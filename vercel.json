@@ -7,8 +7,10 @@
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/login", "destination": "/admin/index.html" },
     { "source": "/admin/dashboard", "destination": "/admin/dashboard.html" },
+    { "source": "/dashboard", "destination": "/admin/dashboard.html" },
     { "source": "/crew", "destination": "/crew/index.html" },
     { "source": "/crew/login", "destination": "/crew/index.html" },
-    { "source": "/crew/app", "destination": "/crew/app.html" }
+    { "source": "/crew/app", "destination": "/crew/app.html" },
+    { "source": "/app", "destination": "/crew/app.html" }
   ]
 }
