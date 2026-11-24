@@ -1,0 +1,13 @@
+# Local dev artifacts
+fe-static/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log

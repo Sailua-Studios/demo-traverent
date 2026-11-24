@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traverent Bandung - Detail Artikel</title>
+<link rel="icon" type="image/png" href="image/favico.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } }
+</script>
+<style type="text/tailwindcss">
+  html { scroll-behavior: smooth; }
+  details summary::-webkit-details-marker { display: none; }
+  details[open] .plus { transform: rotate(45deg); }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+  .rings { background: repeating-radial-gradient(circle at center, theme('colors.neutral.300') 0 1px, transparent 1px 7px); }
+  #art-body h2 { @apply mt-10 mb-3 text-2xl font-medium tracking-tight text-neutral-900; }
+  #art-body h3 { @apply mt-7 mb-2 text-lg font-semibold text-neutral-900; }
+  #art-body h4 { @apply mt-4 mb-1.5 text-sm font-semibold text-neutral-800; }
+  #art-body p { @apply mb-4 leading-relaxed text-neutral-600; }
+  #art-body ul { @apply mb-4 list-disc space-y-1.5 pl-5 text-neutral-600; }
+  #art-body a { @apply font-medium text-neutral-900 underline underline-offset-2 hover:text-neutral-600; }
+
+  @keyframes diaSweep {
+    0% { background-position: 100% 0; opacity: 0.25; transform: translateY(8px); }
+    15% { opacity: 1; }
+    100% { background-position: 0% 0; opacity: 1; transform: translateY(0); }
+  }
+  .dia-reveal { opacity: 0; }
+  .dia-reveal.is-visible {
+    opacity: 1;
+    background-image: linear-gradient(90deg, var(--dia-end, #171717) 0%, var(--dia-end, #171717) 35%, #2563eb 52%, #60a5fa 66%, transparent 82%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: diaSweep 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .dia-reveal.is-visible * { color: transparent; }
+  .dia-reveal.dia-done,
+  .dia-reveal.dia-done * {
+    background-image: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    color: revert-layer;
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .dia-reveal, .reveal { opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="bg-white font-sans text-neutral-900 antialiased">
+
+<!-- ================= NAVBAR ================= -->
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur">
+  <div class="p-3 pb-0">
+    <nav class="mx-auto flex w-full max-w-4xl items-center justify-between rounded-md border border-neutral-200/80 bg-white px-4 py-2.5">
+      <!-- LOGO -->
+      <a href="index.html" class="flex h-7 w-28 items-center justify-center">
+        <img src="image/logo-navbar.png" alt="Traverent Bandung" class="h-full w-full object-contain">
+      </a>
+      <div class="hidden items-center gap-6 text-xs text-neutral-600 md:flex">
+        <a href="index.html#tentang" data-i18n="nav_about" class="hover:text-neutral-900">Tentang Kami</a>
+        <a href="index.html#testimoni" data-i18n="nav_testi" class="hover:text-neutral-900">Testimoni</a>
+        <a href="index.html#faq" data-i18n="nav_terms" class="hover:text-neutral-900">Syarat &amp; Ketentuan</a>
+        <a href="index.html#faq" data-i18n="nav_faq" class="hover:text-neutral-900">FAQ</a>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Language Switcher -->
+        <div class="flex items-center rounded border border-neutral-200 bg-neutral-50 p-0.5 text-[11px] font-medium text-neutral-600">
+          <button type="button" id="lang-id" class="rounded px-2 py-0.5 transition-colors bg-white font-semibold text-neutral-900 shadow-sm">ID</button>
+          <button type="button" id="lang-en" class="rounded px-2 py-0.5 transition-colors text-neutral-500 hover:text-neutral-900">EN</button>
+        </div>
+        <a href="index.html#unit" data-i18n="nav_start" class="rounded bg-blue-600 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-blue-700">Mulai Sewa</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- ================= DETAIL ARTIKEL ================= -->
+<main>
+  <article id="article-content">
+
+    <!-- Header Artikel -->
+    <div class="mx-auto max-w-2xl px-4 pb-8 pt-10 sm:pb-10 sm:pt-14">
+      <a href="index.html#blog" class="inline-flex items-center gap-1.5 rounded bg-neutral-100 px-2.5 py-1 text-[11px] font-medium text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900">
+        <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        <span data-i18n="go_back">Kembali</span>
+      </a>
+
+      <h1 id="art-title" class="dia-reveal mt-6 text-3xl font-medium leading-[1.15] tracking-tight text-neutral-900 sm:text-4xl"></h1>
+
+      <div class="reveal mt-5 space-y-2.5">
+        <p id="art-read" class="text-[11px] text-neutral-400"></p>
+        <div class="flex items-center gap-2 text-xs font-medium text-neutral-700">
+          <img src="image/favico.png" alt="Traverent" class="h-5 w-5 shrink-0 rounded-full object-cover">
+          <span id="art-author">Traverent</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-Width Hero Image -->
+    <div id="art-hero" class="w-full bg-neutral-100"></div>
+
+    <!-- Isi Artikel -->
+    <div id="art-body" class="reveal mx-auto max-w-2xl px-4 pb-20 pt-10 text-sm leading-relaxed text-neutral-600 sm:pb-24 sm:pt-12 sm:text-[15px] sm:leading-[1.8]"></div>
+
+  </article>
+</main>
+
+<!-- ================= ARTIKEL LAINNYA ================= -->
+<section id="blog" class="mx-auto max-w-6xl px-4 pb-24">
+  <div class="rounded-md bg-neutral-50 p-5 sm:p-8">
+    <h2 class="dia-reveal text-3xl font-medium leading-tight tracking-tight"><span data-i18n="blog_title_1">Artikel kami untuk perjalanan</span><br><span data-i18n="blog_title_2" class="text-neutral-400">yang lebih seru &amp; nyaman</span></h2>
+    <p data-i18n="blog_desc" class="reveal mt-3 max-w-md text-xs text-neutral-500">Tips, rekomendasi destinasi, dan panduan seputar sewa motor di Bandung.</p>
+    <div id="blog-list" class="mt-6 grid gap-4 md:grid-cols-3"></div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-neutral-900 text-neutral-300">
+  <div class="mx-auto grid max-w-5xl gap-10 px-6 py-14 md:grid-cols-[2fr_1fr_1.2fr]">
+    <div>
+      <!-- LOGO (footer) -->
+      <a href="index.html" class="inline-flex h-8 items-center justify-start">
+        <img src="image/logo-footer.png" alt="Traverent Bandung" class="h-full w-auto object-contain object-left">
+      </a>
+      <p class="mt-4 text-3xl font-semibold leading-tight tracking-tight text-white"><span data-i18n="footer_title_1">Sewa motor.</span><br><span data-i18n="footer_title_2" class="text-neutral-500">Jelajahi Bandung.</span></p>
+    </div>
+    <div class="text-xs"><h4 data-i18n="footer_nav" class="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-500">Navigasi</h4>
+      <ul class="space-y-2"><li><a href="index.html#unit" data-i18n="nav_unit" class="hover:text-white">Unit Motor</a></li><li><a href="index.html#tentang" data-i18n="nav_about" class="hover:text-white">Tentang Kami</a></li><li><a href="index.html#testimoni" data-i18n="nav_testi" class="hover:text-white">Testimoni</a></li><li><a href="index.html#blog" data-i18n="nav_blog" class="hover:text-white">Blogs</a></li><li><a href="index.html#faq" data-i18n="nav_faq" class="hover:text-white">FAQ</a></li></ul></div>
+    <div class="text-xs"><h4 data-i18n="footer_contact" class="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-500">Hubungi Kami</h4>
+      <ul class="space-y-2.5">
+        <li class="flex items-center gap-2">
+          <a href="https://wa.me/6281804103710" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center h-9 w-9 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" aria-label="WhatsApp">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969S17.547 2 12.031 2zm5.813 14.125c-.25.703-1.438 1.344-2 1.422-.516.078-1.172.109-1.891-.125-.438-.141-.984-.328-1.688-.641-2.969-1.281-4.906-4.266-5.063-4.469-.141-.203-1.203-1.594-1.203-3.047 0-1.453.766-2.172 1.031-2.469.266-.297.594-.375.797-.375.203 0 .391.016.563.016.188 0 .438-.063.672.516.25.609.844 2.063.922 2.219.078.156.125.344.016.547-.094.203-.156.328-.297.5-.156.172-.313.391-.453.516-.141.141-.297.297-.125.594.172.297.766 1.266 1.641 2.047 1.125 1 2.078 1.313 2.375 1.469.297.141.469.125.641-.078.172-.203.75-.875.953-1.172.203-.297.406-.25.672-.156.266.094 1.719.813 2.016.953.297.156.484.219.563.344.078.125.078.734-.172 1.438z"/></svg>
+          </a>
+          <a href="mailto:traverent.bdg@gmail.com" class="flex items-center justify-center h-9 w-9 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" aria-label="Email">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </a>
+          <a href="https://www.instagram.com/traverent_bandung" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center h-9 w-9 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" aria-label="Instagram">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          </a>
+          <a href="https://web.facebook.com/traverent.bandung" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center h-9 w-9 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" aria-label="Facebook">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
+          </a>
+        </li>
+        <li class="pt-1 text-neutral-400 leading-relaxed">Jl. Peta Gg. Pst. Muhammadiyah No.197, RT.05/RW.02, Pelindung Hewan, Kec. Astanaanyar, Kota Bandung, Jawa Barat 40243</li>
+      </ul></div>
+  </div>
+  <div data-i18n="footer_copy" class="border-t border-white/10 px-6 py-5 text-center text-[11px] text-neutral-500">© 2026 Traverent Bandung. Bagian dari Traverent Group.</div>
+</footer>
+
+<!-- ================= BOTTOM READING PROGRESS BAR ================= -->
+<div aria-hidden="true" class="pointer-events-none fixed inset-x-0 bottom-0 z-50 h-1 bg-neutral-200/70">
+  <div id="read-progress" class="h-full w-0 bg-blue-600 transition-[width] duration-75 ease-out"></div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  // ---- Data Artikel dari 3 URL Traverent Blog ---- 
+  const POSTS = [
+    {
+      slug: '5-tempat-wisata-hits-di-bandung-pakai-motor',
+      cat: 'Destinasi',
+      date: '10 Jul 2026',
+      read: '5 Menit Baca',
+      author: 'Traverent',
+      title: '5 Tempat Wisata Hits di Bandung yang Asyik Dikunjungi Pakai Motor',
+      img: 'image/blog-1.webp',
+      // Konten dari: https://sewamotordibandung.com/blog/5-tempat-wisata-hits-di-bandung-pakai-motor
+      body: `<p>Menjelajahi keindahan Bandung mulai dari pegunungan berawan hingga kawah eksotis terasa jauh lebih praktis dan seru jika diakses dengan menggunakan sepeda motor.</p>
+
+<h2>Pendahuluan</h2>
+<p>Bandung selalu menjadi destinasi favorit akhir pekan bagi wisatawan. Namun kemacetan lalu lintas sering kali menjadi kendala utama. Berkendara dengan sepeda motor adalah solusi terbaik untuk melintasi kemacetan jalanan Bandung dan menjangkau berbagai destinasi hits tersembunyi yang sulit dicapai kendaraan roda empat.</p>
+
+<h3>1. Tebing Keraton Lembang</h3>
+<p>Menawarkan pemandangan hamparan hutan pinus hijau yang berkabut indah di pagi hari. Menuju ke sini menggunakan motor sangat praktis untuk menembus tanjakan Dago Pakar yang padat.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Gunakan motor bertransmisi prima karena jalur menanjak berbatu di bagian akhir.</li>
+<li>Bawa jaket tebal karena udara Lembang cukup dingin di pagi hari.</li>
+<li>Datanglah sebelum pukul 06.00 WIB untuk pemandangan golden sunrise.</li>
+</ul>
+<p>Rekomendasi: Pastikan ban motor memiliki kembangan yang baik agar tidak selip di jalur tanah.</p>
+
+<h3>2. Kawah Putih Ciwidey</h3>
+<p>Danau vulkanik dengan air berwarna putih kehijauan yang eksotis. Mengendarai motor menuju Ciwidey menyuguhkan panorama perkebunan teh yang membentang di sepanjang jalur selatan Bandung.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Jarak perjalanan cukup jauh (sekitar 2 jam dari kota), gunakan motor yang nyaman.</li>
+<li>Bawa masker karena bau belerang terkadang cukup menyengat.</li>
+<li>Parkir motor di area bawah dan gunakan shuttle ontang-anting ke kawah, atau bawa motor ke atas dengan tarif khusus.</li>
+</ul>
+<p>Rekomendasi: Sewa jas hujan tebal karena kawasan Ciwidey sering diguyur hujan mendadak.</p>
+
+<h3>3. Orchid Forest Cikole</h3>
+<p>Hutan konservasi anggrek terbesar di Indonesia yang dikelilingi pohon pinus tinggi dengan jembatan gantung berlampu syahdu saat sore hari.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Parkir motor luas dan aman tepat di depan area tiket masuk.</li>
+<li>Siapkan pakaian hangat karena letaknya yang berada di kaki Gunung Tangkuban Parahu.</li>
+</ul>
+<p>Rekomendasi: Gunakan motor matic lincah agar perjalanan membelah kemacetan jalan Setiabudi Lembang terasa ringan.</p>
+
+<h3>4. Jalan Braga & Asia Afrika</h3>
+<p>Pusat sejarah kota Bandung dengan arsitektur art-deco kolonial Belanda yang dipenuhi kafe estetik dan seniman jalanan.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Gunakan motor agar mudah mencari parkir di sepanjang gang jalan Braga.</li>
+<li>Sangat direkomendasikan untuk berkeliling di malam hari saat lampu jalan menyala romantis.</li>
+</ul>
+<p>Rekomendasi: Gunakan motor matic stylish seperti Vespa atau Scoopy agar cocok dengan nuansa retro Braga.</p>
+
+<h3>5. Farmhouse Lembang</h3>
+<p>Wisata rekreasi keluarga bergaya Eropa dengan peternakan mini, bangunan klasik, dan penyewaan kostum tradisional Belanda.</p>
+<ul>
+<li>Datang saat hari biasa (weekdays) untuk menghindari lautan pengunjung.</li>
+<li>Tukarkan tiket masuk dengan susu murni Lembang gratis.</li>
+</ul>
+<p>Rekomendasi: Simpan helm di bagas.</p>`,
+    },
+    {
+      slug: 'tips-aman-berkendara-motor-liburan-lembang',
+      cat: 'Tips',
+      date: '8 Jul 2026',
+      read: '7 Menit Baca',
+      author: 'Traverent',
+      title: 'Tips Aman Berkendara Motor Saat Liburan di Kawasan Lembang',
+      img: 'image/blog-2.webp',
+      // Konten dari: https://sewamotordibandung.com/blog/tips-aman-berkendara-motor-liburan-lembang
+      body: `<p>Kawasan Lembang Bandung menawarkan pemandangan indah namun memiliki tantangan jalanan yang menuntut kewaspadaan tinggi bagi para pemotor.</p>
+
+<h2>Pendahuluan</h2>
+<p>Jalur Lembang terkenal dengan kombinasi tanjakan curam, tikungan tajam, serta sistem lalu lintas satu arah (one way) periodik saat liburan. Berkendara motor di Lembang memerlukan konsentrasi tinggi, pemahaman rute alternatif, dan kesiapan unit kendaraan yang maksimal agar liburan Anda tetap aman.</p>
+
+<h3>1. Periksa Kondisi Rem & Ban</h3>
+<p>Jalur menanjak dan turunan tajam seperti daerah Punclut atau Dago Giri akan memaksa rem bekerja lebih keras. Rem yang prima adalah keselamatan utama.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Pastikan kampas rem depan dan belakang dalam kondisi prima.</li>
+<li>Cek tekanan angin ban agar daya cengkram ke aspal stabil.</li>
+<li>Hindari menahan tuas rem terus-menerus di turunan panjang agar tidak overheat.</li>
+</ul>
+<p>Rekomendasi: Gunakan engine brake atau bantuan rem motor matic dengan melepas gas secara bertahap saat melintasi turunan curam Lembang.</p>
+
+<h3>2. Antisipasi Cuaca & Kabut Lembang</h3>
+<p>Kabut tebal bisa turun sewaktu-waktu di Lembang, terutama pada sore dan malam hari, sehingga membatasi jarak pandang berkendara.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Nyalakan selalu lampu utama motor Anda.</li>
+<li>Kurangi kecepatan dan jaga jarak aman dengan kendaraan lain.</li>
+<li>Selalu bawa jas hujan setelan baju-celana berkualitas.</li>
+</ul>
+<p>Rekomendasi: Gunakan helm dengan kaca (visor) bening agar pandangan tetap jelas saat menembus kabut dan embun Lembang.</p>
+
+<h3>3. Pahami Jalur Alternatif & One Way</h3>
+<p>Polrestabes Bandung sering memberlakukan rekayasa lalu lintas satu arah (one way) sepintas di jalan raya Lembang saat macet parah.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Ketahui jalan alternatif seperti Dago Giri atau Ciumbuleuit, namun waspadai tanjakannya yang super ekstrim.</li>
+<li>Patuhi arahan petugas kepolisian di setiap pertigaan utama.</li>
+<li>Tetap sabar dan berkendara di lajur kiri.</li>
+</ul>
+<p>Rekomendasi: Gunakan aplikasi navigasi real-time seperti Google Maps untuk memantau titik-titik kemacetan terupdate di Lembang.</p>
+
+<h2>Kesimpulan</h2>
+<p>Berkendara motor ke Lembang akan sangat menyenangkan jika diiringi rasa disiplin berkendara yang tinggi. Lakukan pengecekan unit secara rutin dan utamakan keselamatan di atas kecepatan.</p>
+
+<h2>Explore Tips & Informasi Wisata</h2>
+<p>[5 Tempat Wisata Hits di Bandung yang Asyik Dikunjungi Pakai Motor — artikel terkait Traverent Bandung 10 Juli 2026 • 5 Menit Baca] [Mengapa Rental Motor Lebih Praktis untuk Solo Traveling? — artikel terkait Traverent Bandung 5 Juli 2026 • 4 Menit Baca]</p>
+
+<h2>Siap Jelajahi Bandung Tanpa Ribet &amp; Bebas Macet?</h2>
+<p>Hubungi kami via WhatsApp sekarang juga dan dapatkan unit motor terbaik untuk petualangan seru Anda di Bandung! <a href="https://wa.me/6281804103710?text=Halo%20Traverent%20Bandung%2C%20saya%20tertarik%20untuk%20sewa%20motor%21%20Boleh%20tanya%20ketersediaan%20unitnya%3F" target="_blank" rel="noopener noreferrer">SEWA MOTOR SEKARANG</a></p>`,
+    },
+    {
+      slug: 'mengapa-rental-motor-praktis-solo-traveling',
+      cat: 'Tips',
+      date: '5 Jul 2026',
+      read: '4 Menit Baca',
+      author: 'Traverent',
+      title: 'Mengapa Rental Motor Lebih Praktis untuk Solo Traveling?',
+      img: 'image/blog-3.webp',
+      // Konten dari: https://sewamotordibandung.com/blog/mengapa-rental-motor-praktis-solo-traveling
+      body: `<p>Melakukan petualangan mandiri atau solo traveling membutuhkan moda transportasi yang fleksibel, ekonomis, dan praktis.</p>
+
+<h2>Pendahuluan</h2>
+<p>Solo traveling memberikan kebebasan penuh bagi Anda untuk mengatur jadwal sendiri. Namun, biaya transportasi sering kali membengkak jika Anda terus menggunakan taksi online. Menyewa sepeda motor memberikan jawaban atas seluruh kebutuhan mobilitas yang praktis selama solo traveling.</p>
+
+<h3>1. Fleksibilitas Waktu & Rute Perjalanan</h3>
+<p>Dengan sepeda motor, Anda bebas mengeksplorasi destinasi tanpa khawatir jadwal angkutan umum atau tarif taksi online yang melonjak saat peak hours.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Bisa berbelok spontan ketika melihat spot foto menarik di pinggir jalan.</li>
+<li>Mudah melewati gang-gang sempit perkotaan untuk menemukan kuliner lokal tersembunyi.</li>
+</ul>
+<p>Rekomendasi: Pilihlah motor matic dengan bagasi luas untuk menampung jas hujan dan tas punggung kecil Anda.</p>
+
+<h3>2. Penghematan Anggaran yang Signifikan</h3>
+<p>Menyewa motor jauh lebih hemat anggaran perjalanan dibanding menyewa mobil atau bolak-balik menggunakan transportasi online.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Tarif sewa harian motor sangat terjangkau dibanding rental mobil.</li>
+<li>Konsumsi bensin motor modern sangat irit dan efisien.</li>
+<li>Tarif parkir motor di tempat wisata jauh lebih murah.</li>
+</ul>
+<p>Rekomendasi: Pilihlah paket sewa mingguan jika Anda berencana melakukan perjalanan panjang.</p>
+
+<h3>3. Bebas Macet & Kemudahan Parkir</h3>
+<p>Kota wisata populer seperti Bandung sering kali macet parah di musim liburan. Menggunakan motor memotong waktu perjalanan Anda secara signifikan.</p>
+<h4>Hal Penting:</h4>
+<ul>
+<li>Lebih mudah meliuk di antara kepadatan barisan mobil.</li>
+<li>Tidak pusing mencari tempat parkir kosong di objek wisata yang ramai pengunjung.</li>
+</ul>
+<p>Rekomendasi: Gunakan helm standar ber-SNI yang disediakan pihak rental untuk keamanan berkendara.</p>
+
+<h2>Kesimpulan</h2>
+<p>Rental motor adalah pilihan paling logis dan menyenangkan bagi solo traveler yang mendambakan petualangan penuh kebebasan, hemat biaya, dan praktis tanpa hambatan kemacetan.</p>`,
+    }
+  ];
+
+  function renderPage(slug) {
+    const post = POSTS.find(p => p.slug === slug) || POSTS[0];
+    const others = POSTS.filter(p => p.slug !== post.slug).slice(0, 3);
+
+    document.title = `${post.title} | Traverent Bandung`;
+    $('art-title').textContent = post.title;
+    $('art-read').textContent = post.read;
+    $('art-author').textContent = post.author;
+
+    // Hero Banner Full-Width
+    $('art-hero').innerHTML = post.img
+      ? `<img src="${post.img}" alt="${post.title}" class="h-64 w-full object-cover sm:h-80 lg:h-[420px]">`
+      : `<div class="flex h-64 w-full items-center justify-center text-xs text-neutral-400 sm:h-80 lg:h-[420px]">Article image</div>`;
+
+    $('art-body').innerHTML = post.body;
+
+    // List artikel lainnya
+    $('blog-list').innerHTML = others.map((p, i) => `
+      <article class="reveal" style="transition-delay:${i * 80}ms">
+        <a href="?artikel=${p.slug}" data-slug="${p.slug}" class="group block">
+          <!-- ARTICLE IMAGE PLACEHOLDER -->
+          ${p.img
+            ? `<div class="h-52 overflow-hidden rounded bg-neutral-100"><img src="${p.img}" alt="${p.title}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"></div>`
+            : `<div class="flex h-52 items-center justify-center rounded bg-neutral-100 text-xs text-neutral-400">Article image</div>`}
+          <div class="mt-3 flex justify-between text-[11px] text-neutral-500"><span>${p.cat}</span><span>${p.date}</span></div>
+          <h3 class="mt-1 text-sm font-medium leading-snug group-hover:text-neutral-600">${p.title}</h3>
+          <div class="mt-3 flex items-center gap-2 text-[11px]"><img src="image/favico.png" alt="${p.author}" class="h-5 w-5 shrink-0 rounded-full object-cover">${p.author}</div>
+        </a>
+      </article>`).join('');
+
+    updateProgress();
+    observeReveals();
+  }
+
+  const revealObs = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const el = en.target;
+      el.classList.add('is-visible');
+      if (el.classList.contains('dia-reveal')) {
+        el.addEventListener('animationend', () => el.classList.add('dia-done'), { once: true });
+      }
+      revealObs.unobserve(el);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' }) : null;
+
+  function observeReveals() {
+    const targets = document.querySelectorAll('.reveal, .dia-reveal');
+    if (!revealObs) { targets.forEach(el => el.classList.add('is-visible')); return; }
+    targets.forEach(el => {
+      if (el.classList.contains('is-visible')) return;
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight * 0.95 && r.bottom > 0) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          el.classList.add('is-visible');
+          if (el.classList.contains('dia-reveal')) {
+            el.addEventListener('animationend', () => el.classList.add('dia-done'), { once: true });
+          }
+        }));
+      } else revealObs.observe(el);
+    });
+  }
+
+  // ---- Language Switcher (sync with landing page) ----
+  let curLang = localStorage.getItem('traverent_lang') || 'id';
+  const I18N = {
+    id: {
+      nav_about: 'Tentang Kami', nav_testi: 'Testimoni', nav_terms: 'Syarat & Ketentuan', nav_faq: 'FAQ', nav_start: 'Mulai Sewa', nav_unit: 'Unit Motor', nav_blog: 'Blogs',
+      go_back: 'Kembali',
+      blog_title_1: 'Artikel kami untuk perjalanan', blog_title_2: 'yang lebih seru & nyaman',
+      blog_desc: 'Tips, rekomendasi destinasi, dan panduan seputar sewa motor di Bandung.',
+      footer_title_1: 'Sewa motor.', footer_title_2: 'Jelajahi Bandung.', footer_nav: 'Navigasi', footer_contact: 'Hubungi Kami',
+      footer_copy: '© 2026 Traverent Bandung. Bagian dari Traverent Group.'
+    },
+    en: {
+      nav_about: 'About Us', nav_testi: 'Testimonials', nav_terms: 'Terms & Conditions', nav_faq: 'FAQ', nav_start: 'Rent Now', nav_unit: 'Motorbikes', nav_blog: 'Blogs',
+      go_back: 'Go Back',
+      blog_title_1: 'Our articles for a', blog_title_2: 'more fun & comfortable trip',
+      blog_desc: 'Tips, destination recommendations, and guides for motorbike rentals in Bandung.',
+      footer_title_1: 'Rent a bike.', footer_title_2: 'Explore Bandung.', footer_nav: 'Navigation', footer_contact: 'Contact Us',
+      footer_copy: '© 2026 Traverent Bandung. Part of Traverent Group.'
+    }
+  };
+  function setLanguage(lang) {
+    curLang = lang === 'en' ? 'en' : 'id';
+    localStorage.setItem('traverent_lang', curLang);
+    document.documentElement.lang = curLang;
+    const d = I18N[curLang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.dataset.i18n;
+      if (d[k]) el.textContent = d[k];
+    });
+    const btnId = $('lang-id'), btnEn = $('lang-en');
+    if (btnId && btnEn) {
+      if (curLang === 'en') {
+        btnEn.className = 'rounded px-2 py-0.5 transition-colors bg-white font-semibold text-neutral-900 shadow-sm';
+        btnId.className = 'rounded px-2 py-0.5 transition-colors text-neutral-500 hover:text-neutral-900';
+      } else {
+        btnId.className = 'rounded px-2 py-0.5 transition-colors bg-white font-semibold text-neutral-900 shadow-sm';
+        btnEn.className = 'rounded px-2 py-0.5 transition-colors text-neutral-500 hover:text-neutral-900';
+      }
+    }
+  }
+  $('lang-id').onclick = () => setLanguage('id');
+  $('lang-en').onclick = () => setLanguage('en');
+  setLanguage(curLang);
+
+  // Reading progress bar
+  let ticking = false;
+  function updateProgress() {
+    const article = $('article-content'), bar = $('read-progress');
+    if (!article || !bar) return;
+    const rect = article.getBoundingClientRect();
+    const scrollable = rect.height - window.innerHeight;
+    const pct = scrollable <= 0
+      ? (rect.bottom <= window.innerHeight ? 100 : 0)
+      : Math.min(100, Math.max(0, (-rect.top / scrollable) * 100));
+    bar.style.width = pct.toFixed(1) + '%';
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => { updateProgress(); ticking = false; });
+      ticking = true;
+    }
+  }, { passive: true });
+  window.addEventListener('resize', updateProgress);
+
+  document.addEventListener('click', e => {
+    const link = e.target.closest('[data-slug]');
+    if (!link) return;
+    e.preventDefault();
+    const slug = link.dataset.slug;
+    history.pushState({ slug }, '', `?artikel=${slug}`);
+    renderPage(slug);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  window.addEventListener('popstate', () => {
+    renderPage(new URLSearchParams(location.search).get('artikel'));
+  });
+
+  renderPage(new URLSearchParams(location.search).get('artikel'));
+</script>
+
+</body>
+</html>

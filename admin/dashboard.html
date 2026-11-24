@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | Traverent Bandung</title>
+<link rel="icon" type="image/png" href="../image/favico.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } }
+</script>
+<!-- Library export (dipakai tombol Export di halaman Report) -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  details summary::-webkit-details-marker { display: none; }
+  /* Panel samping (side sheet) masuk dari kanan */
+  @keyframes m-slide-in { from { transform: translateX(32px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes adm-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .m-slide { animation: m-slide-in .2s ease-out; }
+  main section:not(.hidden), #acct-menu:not(.hidden) { animation: adm-fade .25s cubic-bezier(.22,1,.36,1) both; }
+  #stats > *, #crew > *, #unit-grid > * { animation: adm-fade .3s cubic-bezier(.22,1,.36,1) both; }
+  button, a, tr[data-trx] { transition: background-color .15s ease, color .15s ease, transform .15s ease; }
+  @media (prefers-reduced-motion: reduce) { .m-slide, main section:not(.hidden), #acct-menu:not(.hidden), #stats > *, #crew > *, #unit-grid > * { animation: none; } button, a, tr[data-trx] { transition: none; } }
+  details[open] > summary .chev { transform: rotate(180deg); }
+</style>
+<!-- Radius: hanya rounded-md (4px) dan rounded-md (6px); rounded-full khusus avatar -->
+</head>
+<body class="bg-neutral-100 font-sans text-neutral-900 antialiased">
+<div class="flex min-h-screen flex-col lg:flex-row">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="flex shrink-0 flex-col gap-4 p-3 lg:sticky lg:top-0 lg:h-screen lg:w-64">
+    <!-- Akun admin (dropdown logout) -->
+    <div id="acct-wrap" class="relative">
+      <button type="button" data-do="acctToggle" aria-haspopup="true" aria-expanded="false" class="flex w-full items-center gap-3 rounded-md bg-white p-3 text-left hover:bg-neutral-50">
+        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-blue-600 text-white"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
+        <span class="min-w-0 flex-1"><span class="block truncate text-sm font-semibold">Admin Traverent</span><span class="block truncate text-[11px] text-neutral-500">admin@traverent.id</span></span>
+        <svg class="h-4 w-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+      </button>
+      <div id="acct-menu" class="absolute inset-x-0 z-30 mt-1 hidden rounded-md bg-white p-1">
+        <button type="button" data-do="logoutAsk" class="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-xs font-medium text-red-700 hover:bg-red-50">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 8l4 4-4 4M19 12H9"/></svg>Keluar</button>
+      </div>
+    </div>
+    <div>
+      <p class="px-3 text-xs text-neutral-500">Menu</p>
+      <nav id="nav" class="mt-2 flex gap-1 overflow-x-auto lg:flex-col"></nav>
+    </div>
+    <!-- Logo Traverent di bagian bawah sidebar -->
+    <div class="mt-auto flex items-center gap-3 rounded-md bg-white p-3">
+      <img src="../image/favico.png" alt="Traverent Bandung" class="h-10 w-10 shrink-0 rounded-md object-cover">
+      <div><p class="text-sm font-semibold">Traverent</p><p class="text-[11px] text-neutral-500">Admin Bandung</p></div>
+    </div>
+  </aside>
+
+  <!-- ============ KONTEN ============ -->
+  <main class="min-w-0 flex-1 p-3 lg:pl-0">
+    <div class="min-h-full rounded-md bg-white p-5 sm:p-8">
+
+      <section id="v-dashboard">
+        <div class="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h1 class="text-3xl font-medium tracking-tight">Halo, Admin Traverent</h1>
+            <p class="mt-1 text-sm text-neutral-500">Berikut order sewa terbaru yang perlu kamu tangani.</p>
+          </div>
+          <p id="today" class="text-xs text-neutral-500"></p>
+        </div>
+        <div id="stats" class="mt-6 grid gap-4 md:grid-cols-3"></div>
+        <div class="mt-8 grid items-start gap-6 lg:grid-cols-[360px_1fr]">
+          <div class="rounded-md bg-neutral-50 p-3">
+            <input id="q" type="search" placeholder="Cari order atau nama penyewa..." class="w-full rounded-md bg-white px-3 py-2.5 text-xs outline-none placeholder:text-neutral-400 focus:ring-2 focus:ring-blue-300">
+            <div id="of" class="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Filter status order"></div>
+            <div id="olist" class="mt-3 max-h-[820px] overflow-y-auto pr-1"></div>
+          </div>
+          <div id="detail" class="min-w-0"></div>
+        </div>
+      </section>
+
+      <section id="v-kru" class="hidden">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 class="text-3xl font-medium tracking-tight">Kru Pengantaran</h1>
+            <p class="mt-1 text-sm text-neutral-500">Pantau kru yang bertugas mengantar motor ke penyewa.</p>
+          </div>
+          <button type="button" data-do="crewAdd" class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-xs font-medium text-white hover:bg-blue-700">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Tambah kru</button>
+        </div>
+        <div id="crew" class="mt-6 grid gap-4 md:grid-cols-3"></div>
+      </section>
+
+      <section id="v-unit" class="hidden">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 class="text-3xl font-medium tracking-tight">Unit Motor</h1>
+            <p class="mt-1 text-sm text-neutral-500">Pantau ketersediaan dan status setiap unit motor.</p>
+          </div>
+          <button type="button" data-do="unitAdd" class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-xs font-medium text-white hover:bg-blue-700">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Tambah unit</button>
+        </div>
+        <div id="unit-filter" class="mt-6 flex flex-wrap gap-2"></div>
+        <div id="unit-grid" class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
+      </section>
+
+      <section id="v-calendar" class="hidden">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 class="text-3xl font-medium tracking-tight">Calendar</h1>
+            <p class="mt-1 text-sm text-neutral-500">Jadwal antar dan kembali motor untuk semua order.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" data-cal="-1" aria-label="Bulan sebelumnya" class="rounded-md bg-neutral-100 px-3 py-2 text-xs hover:bg-neutral-200">‹</button>
+            <span id="cal-title" class="min-w-[130px] text-center text-sm font-semibold"></span>
+            <button type="button" data-cal="1" aria-label="Bulan berikutnya" class="rounded-md bg-neutral-100 px-3 py-2 text-xs hover:bg-neutral-200">›</button>
+            <button type="button" data-cal="0" class="rounded-md bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700">Hari ini</button>
+          </div>
+        </div>
+        <div id="cal-legend" class="mt-4 flex flex-wrap gap-2"></div>
+        <div class="mt-4 overflow-x-auto">
+          <div class="min-w-[720px] overflow-hidden rounded-md bg-neutral-50">
+            <div class="grid grid-cols-7 bg-neutral-50 px-1 pt-1 text-center text-xs text-neutral-500">
+              <span class="py-2">Sen</span><span class="py-2">Sel</span><span class="py-2">Rab</span><span class="py-2">Kam</span><span class="py-2">Jum</span><span class="py-2">Sab</span><span class="py-2">Min</span>
+            </div>
+            <div id="cal-grid" class="grid grid-cols-7 gap-1 bg-neutral-50 p-1"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="v-report" class="hidden">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 class="text-3xl font-medium tracking-tight">Report</h1>
+            <p class="mt-1 text-sm text-neutral-500">Ringkasan pemasukan dan transaksi terbaru.</p>
+          </div>
+          <div id="exp-wrap" class="relative">
+            <button type="button" data-do="expToggle" aria-haspopup="true" class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-xs font-medium text-white hover:bg-blue-700">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Export
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div id="exp-menu" class="absolute right-0 z-20 mt-1 hidden w-52 rounded-md bg-neutral-100 p-1">
+              <button type="button" data-do="expPdf" class="block w-full rounded-md px-3 py-2 text-left text-xs hover:bg-neutral-200">PDF <span class="text-neutral-400">(.pdf)</span></button>
+              <button type="button" data-do="expXls" class="block w-full rounded-md px-3 py-2 text-left text-xs hover:bg-neutral-200">Excel / Spreadsheet <span class="text-neutral-400">(.xlsx)</span></button>
+            </div>
+          </div>
+        </div>
+        <div id="fin-stats" class="mt-6 grid gap-4 md:grid-cols-3"></div>
+        <h2 class="mt-8 text-sm font-semibold">Transaksi terbaru</h2>
+        <p class="mt-1 text-xs text-neutral-500">Klik baris transaksi untuk melihat detailnya.</p>
+        <div class="mt-3 overflow-x-auto rounded-md bg-neutral-50 p-2">
+          <table class="w-full min-w-[640px] border-separate border-spacing-y-1 text-left text-xs">
+            <thead class="text-neutral-500"><tr><th class="px-4 py-2 font-medium">Tanggal</th><th class="px-4 py-3 font-medium">Order</th><th class="px-4 py-3 font-medium">Penyewa</th><th class="px-4 py-3 font-medium">Keterangan</th><th class="px-4 py-3 font-medium">Nominal</th><th class="px-4 py-3 font-medium">Status</th></tr></thead>
+            <tbody id="fin-rows" class="[&>tr>td]:bg-white [&>tr:hover>td]:bg-neutral-100 [&>tr>td:first-child]:rounded-l-md [&>tr>td:last-child]:rounded-r-md"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal bersama (dipakai semua modal di admin): header + tombol tutup, isi, footer aksi -->
+<div id="modal" class="fixed inset-0 z-50 hidden justify-end bg-neutral-900/40 p-3">
+  <div id="m-box" role="dialog" aria-modal="true" aria-labelledby="m-title" class="m-slide flex h-full w-full max-w-xl flex-col overflow-hidden rounded-md bg-white">
+    <div class="flex items-center justify-between px-6 py-4">
+      <h3 id="m-title" class="text-base font-semibold"></h3>
+      <button type="button" data-m-close aria-label="Tutup" class="grid h-8 w-8 place-items-center rounded-md text-neutral-500 hover:bg-neutral-100">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div id="m-body" class="overflow-y-auto px-6 py-5"></div>
+    <div id="m-foot" class="hidden items-center justify-end gap-2 px-6 py-4"></div>
+  </div>
+</div>
+
+<script src="../demo-store.js"></script>
+<script>
+  const ADMIN_AUTH_KEY = 'traverent_admin_session';
+  try {
+    if (!localStorage.getItem(ADMIN_AUTH_KEY)) location.replace('index.html');
+  } catch (_) {}
+  const $ = id => document.getElementById(id), pad = n => String(n).padStart(2, '0');
+  const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const dt = (off, t) => { const d = new Date(today); d.setDate(d.getDate() + off); d.setHours(+t.slice(0, 2), +t.slice(3)); return d; };
+  const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const fd = d => `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]}`;
+  const ft = d => `${fd(d)}, ${hm(d)}`;
+  const rp = n => 'Rp ' + n.toLocaleString('id-ID');
+  const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const dur = (a, b) => { const ms = b - a, d = Math.floor(ms / 864e5), h = Math.round((ms % 864e5) / 36e5); return [d && d + ' hari', h && h + ' jam'].filter(Boolean).join(' '); };
+  const waNum = n => { const d = n.replace(/\D/g, ''); return d.startsWith('0') ? '62' + d.slice(1) : d; };
+  const waTo = (num, msg) => window.open(`https://web.whatsapp.com/send?phone=${waNum(num)}${msg ? '&text=' + encodeURIComponent(msg) : ''}`, '_blank');
+  const waOpen = (o, msg) => waTo(o.wa, msg);
+
+  const DP_AMOUNT = 100000;
+  const DP_URL = location.origin + '/konfirmasi.html?step=dp&order=';
+  const CREW_URL = location.origin + '/crew/';
+  const RETURN_URL = location.origin + '/konfirmasi.html?step=return&order=';
+  const LOGIN_URL = 'index.html';
+
+  // ---------- Alur status ----------
+  // review -> accepted -> awaiting_dp -> dp_uploaded -> assigned -> notified
+  const ST = {
+    review: ['Perlu dicek', 'bg-amber-50 text-amber-900'],
+    accepted: ['Diterima', 'bg-blue-50 text-blue-900'],
+    awaiting_dp: ['Menunggu DP', 'bg-orange-50 text-orange-900'],
+    dp_uploaded: ['DP masuk', 'bg-cyan-50 text-cyan-900'],
+    assigned: ['Kru ditugaskan', 'bg-violet-50 text-violet-900'],
+    notified: ['Customer diberi tahu', 'bg-green-50 text-green-900'],
+    return_due: ['Waktunya kembali', 'bg-rose-50 text-rose-900'],
+    return_assigned: ['Kru pengembalian ditugaskan', 'bg-indigo-50 text-indigo-900'],
+    return_notified: ['Pengingat kembali terkirim', 'bg-teal-50 text-teal-900'],
+    settled: ['Lunas', 'bg-emerald-50 text-emerald-900']
+  };
+  const SUB = {
+    review: 'Periksa kembali data penyewa sebelum menerima pesanan.',
+    accepted: 'Pesanan diterima. Kirim link upload DP ke penyewa lewat WhatsApp.',
+    awaiting_dp: 'Link DP sudah dikirim. Menunggu penyewa mengunggah bukti DP.',
+    dp_uploaded: 'Bukti DP sudah masuk. Periksa bukti, lalu tugaskan kru pengantar.',
+    assigned: 'Kru sudah ditugaskan. Beri tahu penyewa lewat WhatsApp.',
+    notified: 'Penyewa sudah diberi tahu. Pesanan siap diantar dan sedang berjalan.',
+    return_due: 'Jadwal kembali dari formulir sewa sudah tiba. Tugaskan kru untuk mengambil motor.',
+    return_assigned: 'Kru pengembalian sudah ditugaskan. Beri tahu penyewa lewat WhatsApp.',
+    return_notified: 'Penyewa sudah diberi tahu. Menunggu kru memperbarui status lunas dan mengunggah bukti pelunasan.',
+    settled: 'Kru sudah mengonfirmasi pelunasan dan mengunggah bukti. Pesanan selesai.'
+  };
+  const PRI = {
+    review: ['accept', 'Terima'], accepted: ['sendDP', 'Kirim link DP'], awaiting_dp: ['sendDP', 'Kirim ulang link DP'],
+    dp_uploaded: ['assign', 'Tugaskan kru'], assigned: ['notify', 'Notify customer'], notified: null,
+    return_due: ['assignReturn', 'Tugaskan kru pengembalian'], return_assigned: ['notifyReturn', 'Notify pengembalian'],
+    return_notified: null, settled: null   // null = hanya tombol Kontak
+  };
+  // Label berwarna hanya 4 tahap; status rinci (mis. "Menunggu DP") tampil sebagai teks abu-abu
+  const GROUPS = {
+    check: ['Perlu dicek', 'bg-amber-50 text-amber-900', 'bg-amber-500', ['review', 'dp_uploaded']],
+    prep: ['Persiapan', 'bg-blue-50 text-blue-900', 'bg-blue-500', ['accepted', 'awaiting_dp', 'assigned']],
+    run: ['Berjalan', 'bg-violet-50 text-violet-900', 'bg-violet-500', ['notified', 'return_due', 'return_assigned', 'return_notified']],
+    done: ['Selesai', 'bg-emerald-50 text-emerald-900', 'bg-emerald-500', ['settled']]
+  };
+  const grpOf = st => Object.keys(GROUPS).find(k => GROUPS[k][3].includes(st));
+  const tag = st => `<span class="inline-block rounded-md px-2 py-0.5 text-[10px] font-medium ${GROUPS[grpOf(st)][1]}">${GROUPS[grpOf(st)][0]}</span>`;
+  const fine = st => ST[st][0] !== GROUPS[grpOf(st)][0] ? ST[st][0] : '';
+  const needsCheck = o => o.st === 'review' || o.st === 'dp_uploaded';
+
+  // ---------- Data dummy ----------
+  const CREW = [
+    { n: 'Asep Saepudin', wa: '081234560001' },
+    { n: 'Dimas Prakoso', wa: '081234560002' },
+    { n: 'Rian Hidayat', wa: '081234560003' }
+  ];
+  CREW.forEach((c, i) => c.id = 'K' + (i + 1)); let crewSeq = CREW.length;
+  const mk = (id, nama, kota, unit, s, e, st, crew, c, extra = {}) => Object.assign({
+    id, nama, kota, unit, s, e, st, crew, c,
+    wa: '0812345678' + id.slice(-2), email: nama.toLowerCase().replace(/\s+/g, '.') + '@gmail.com',
+    ec: ['Keluarga ' + nama.split(' ')[0], '0812987654' + id.slice(-2)], ig: '@' + nama.toLowerCase().replace(/\s+/g, ''), tt: '',
+    tujuan: 'Wisata keliling Bandung, mengunjungi Lembang dan Dago.', area: 'Lembang, Dago',
+    alamat: 'Hotel Grand Asia, Jl. Braga No. 12, Bandung'
+  }, extra);
+  const ORDERS = [
+    mk('ORD-29102', 'Rizky Pratama', 'Jakarta', 'Honda New Beat', dt(3, '09:00'), dt(6, '17:00'), 'review', null, [0, '09:12'], { tt: '@rizky.pr' }),
+    mk('ORD-29101', 'Siti Nurhaliza', 'Surabaya', 'Honda Vario 125', dt(2, '08:00'), dt(4, '18:00'), 'review', null, [0, '08:40'], { tujuan: 'Liburan keluarga dan wisata kuliner.', area: 'Setiabudi, Cihampelas', alamat: 'Cihampelas Inn, Jl. Cihampelas No. 88, Bandung' }),
+    mk('ORD-29098', 'Andre Wijaya', 'Medan', 'Yamaha Gear 125', dt(1, '10:00'), dt(3, '16:00'), 'awaiting_dp', null, [0, '07:55'], { tt: '@andrew', alamat: 'Hotel Dago Suites, Jl. Ir. H. Juanda No. 45, Bandung' }),
+    mk('ORD-29095', 'Dewi Lestari', 'Yogyakarta', 'Honda Scoopy', dt(1, '09:00'), dt(2, '19:00'), 'dp_uploaded', null, [-1, '16:20'], { alamat: 'Hotel Pasteur Inn, Jl. Dr. Djundjunan No. 7, Bandung' }),
+    mk('ORD-29090', 'Budi Santoso', 'Malang', 'Honda Beat Street', dt(0, '13:00'), dt(2, '13:00'), 'notified', 'Dimas Prakoso', [-1, '11:05'], { alamat: 'Homestay Lembang Asri, Jl. Raya Lembang No. 101' }),
+    mk('ORD-29087', 'Maya Putri', 'Semarang', 'Honda Vario 160', dt(4, '09:00'), dt(5, '17:00'), 'assigned', 'Asep Saepudin', [-1, '09:30'], { tt: '@mayaputri', alamat: 'Apartemen Taman Sari, Jl. Taman Sari No. 20, Bandung' })
+  ];
+  // Riwayat & dokumen mengikuti tahap status. Isi src dengan URL gambar asli (kosong = placeholder).
+  const STEPS = ['accepted', 'awaiting_dp', 'dp_uploaded', 'dp_verified', 'assigned', 'notified'];
+  ORDERS.forEach(o => {
+    const upto = { review: 0, accepted: 1, awaiting_dp: 2, dp_uploaded: 3, assigned: 5, notified: 6 }[o.st];
+    const txt = ['Pesanan diterima admin', 'Link upload DP dikirim ke penyewa via WhatsApp', 'Penyewa mengunggah bukti DP', 'DP diverifikasi', 'Ditugaskan ke ' + o.crew, 'Notifikasi dikirim ke penyewa via WhatsApp'];
+    const [h, m] = o.c[1].split(':').map(Number), at = k => { const t = h * 60 + m + 12 * (k + 1); return pad(Math.floor(t / 60) % 24) + ':' + pad(t % 60); };
+    o.log = [{ t: o.c[1], x: 'Penyewa mengirim formulir pemesanan' }].concat(txt.slice(0, upto).map((x, k) => ({ t: at(k), x })));
+    // by = peran pengunggah (Penyewa / Kru), tampil sebagai label di Dokumen & Bukti
+    o.docs = [{ l: 'KTP', s: '', by: 'Penyewa' }, { l: 'SIM C', s: '', by: 'Penyewa' }];   // dokumen identitas dari formulir
+    if (['dp_uploaded', 'assigned', 'notified'].includes(o.st)) o.docs.push({ l: 'Bukti DP', s: '', by: 'Penyewa' });
+  });
+
+  const TRX = [
+    [0, 'ORD-29095', 'Dewi Lestari', 'DP', DP_AMOUNT, 'Menunggu verifikasi'],
+    [-1, 'ORD-29090', 'Budi Santoso', 'DP', DP_AMOUNT, 'Diterima'],
+    [-1, 'ORD-29087', 'Maya Putri', 'DP', DP_AMOUNT, 'Diterima'],
+    [-2, 'ORD-29080', 'Hendra Kusuma', 'Pelunasan', 420000, 'Lunas'],
+    [-4, 'ORD-29072', 'Rina Marlina', 'Pelunasan', 285000, 'Lunas']
+  ].map(([d, id, n, k, a, s]) => ({ d, id, n, k, a, s }));
+  const paid = t => t.s !== 'Menunggu verifikasi';
+  const ACTIVE_TODAY = 8;       // dummy: jumlah unit sedang disewa hari ini
+
+  // ---------- Tarif & biaya (dummy, samakan dengan list unit di index.html) ----------
+  // [weekday [12 jam, 24 jam], weekend [12 jam, 24 jam]]; extra hours Rp 10.000/jam (maks. 3 jam)
+  const RATES = {
+    'Honda New Beat': [[85000, 95000], [105000, 120000], [10000, 15000]],
+    'Honda New Vario': [[105000, 115000], [130000, 145000], [15000, 20000]],
+    'Yamaha New Gear': [[95000, 105000], [115000, 130000], [10000, 15000]]
+  };
+  const isWE = d => [0, 5, 6].includes(d.getDay());
+  function calc(o) {
+    const [wd, we, ex] = RATES[o.unit] || [[95000, 105000], [115000, 130000], [10000, 15000]];
+    const rate = (d, i) => (isWE(d) ? we : wd)[i], tp = d => isWE(d) ? 'Weekend' : 'Weekday';
+    const extraRate = d => (isWE(d) ? (ex ? ex[1] : 15000) : (ex ? ex[0] : 10000));
+    const ms = o.e - o.s, days = Math.floor(ms / 864e5), r = Math.ceil((ms - days * 864e5) / 36e5), map = {};
+    const add = (label, price, qty) => { const k = label + price; (map[k] = map[k] || { label, price, qty: 0 }).qty += qty; };
+    for (let i = 0; i < days; i++) { const d = new Date(o.s); d.setDate(d.getDate() + i); add(`Sewa 24 jam · ${tp(d)}`, rate(d, 1), 1); }
+    if (r > 0) { const d = new Date(o.s); d.setDate(d.getDate() + days);
+      if (r <= 3) add(`Extra hours · ${tp(d)}`, extraRate(d), r); else if (r <= 12) add(`Sewa 12 jam · ${tp(d)}`, rate(d, 0), 1); else add(`Sewa 24 jam · ${tp(d)}`, rate(d, 1), 1); }
+    const items = Object.values(map).map(i => Object.assign(i, { sub: i.price * i.qty }));
+    return { items, total: items.reduce((a, i) => a + i.sub, 0) };
+  }
+  // sisa pembayaran order = total biaya - pembayaran yang sudah diterima
+  const remain = o => Math.max(0, calc(o).total - TRX.filter(t => t.id === o.id && paid(t)).reduce((a, t) => a + t.a, 0));
+
+  // ---------- State ----------
+  let view = 'dashboard', sel = ORDERS[0].id, tab = 'detail';
+  const get = () => ORDERS.find(o => o.id === sel);
+  const jobsOf = n => ORDERS.flatMap(o => [
+    ...(o.crew === n && (o.st === 'assigned' || o.st === 'notified') ? [{ o, tipe: 'Antar', at: o.s }] : []),
+    ...(o.rcrew === n && (o.st === 'return_assigned' || o.st === 'return_notified') ? [{ o, tipe: 'Ambil', at: o.e }] : [])]);
+  const load = n => jobsOf(n).length;
+  const logNow = (o, x) => o.log.push({ t: hm(new Date()), x });
+
+  // ---------- Nav ----------
+  const VIEWS = [
+    ['dashboard', 'Dashboard', '<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>'],
+    ['kru', 'Kru Pengantaran', '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M21 20a6 6 0 0 0-4-5.6"/>'],
+    ['unit', 'Unit Motor', '<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-3-8h-3M14 9h3l1 8"/>'],
+    ['calendar', 'Calendar', '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
+    ['report', 'Report', '<path d="M5 21V10M12 21V4M19 21v-7"/>']
+  ];
+  function renderNav() {
+    const n = ORDERS.filter(needsCheck).length;
+    $('nav').innerHTML = VIEWS.map(v => `<a href="#${v[0]}" class="flex items-center gap-3 whitespace-nowrap rounded-md px-3 py-2.5 text-sm ${view === v[0] ? 'bg-white font-medium text-blue-600' : 'text-neutral-600 hover:bg-white/60'}">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">${v[2]}</svg>${v[1]}
+      ${v[0] === 'dashboard' && n ? `<span class="ml-auto rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-900">${n}</span>` : ''}</a>`).join('');
+  }
+  function show() {
+    const h = location.hash.slice(1); view = VIEWS.some(v => v[0] === h) ? h : 'dashboard';
+    VIEWS.forEach(v => $('v-' + v[0]).classList.toggle('hidden', v[0] !== view));
+    renderNav();
+  }
+  addEventListener('hashchange', show);
+
+  // ---------- Kartu ringkasan ----------
+  const CI = {
+    check: '<path d="M5 12l5 5L20 7"/>',
+    alert: '<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+    bike: '<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-3-8h-3M14 9h3l1 8"/>',
+    money: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>'
+  };
+  const dashed = '<svg class="h-4 w-4 shrink-0 text-neutral-300" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2.2 3.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>';
+  // Kartu: panel abu berisi ikon aksen biru + angka, catatan di bawah panel
+  const card = (label, val, note, noteCls, ic = 'check') => `<div class="rounded-md bg-neutral-50 p-1.5">
+    <div class="rounded-md bg-white px-4 py-4"><div class="flex items-center gap-3"><span class="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-blue-50 text-blue-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">${CI[ic]}</svg></span><span class="text-sm text-neutral-500">${label}</span></div>
+      <p class="mt-3 pl-12 text-3xl font-medium tracking-tight">${val}</p></div>
+    <div class="flex items-center justify-between gap-2 px-2.5 pb-1.5 pt-2.5 text-xs ${noteCls}"><span class="flex min-w-0 items-center gap-2">${dashed}<span class="truncate">${note}</span></span>${dashed}</div></div>`;
+  function renderStats() {
+    const f = ORDERS.filter(o => o.st === 'review').length, d = ORDERS.filter(o => o.st === 'dp_uploaded').length;
+    const inc = TRX.filter(t => t.d === 0 && paid(t)).reduce((a, t) => a + t.a, 0);
+    $('stats').innerHTML = card('Order perlu dicek', f + d, f + d ? `${f} formulir baru · ${d} bukti DP` : 'Semua order sudah diperiksa', 'text-amber-700', 'alert')
+      + card('Total sewa hari ini', ACTIVE_TODAY, 'Unit sedang disewa', 'text-green-700', 'bike')
+      + card('Penghasilan hari ini', rp(inc), 'Dari DP dan pelunasan yang diterima', 'text-green-700', 'money')
+  }
+
+  // ---------- Daftar order ----------
+  // Filter status: "Perlu dicek" = formulir baru + bukti DP masuk
+  const FILTERS = [['all', 'Semua', () => true], ...Object.keys(GROUPS).map(k => [k, GROUPS[k][0], o => grpOf(o.st) === k])];
+  const PRIO = ['review', 'dp_uploaded', 'return_due', 'accepted', 'awaiting_dp', 'return_assigned', 'assigned', 'return_notified', 'notified', 'settled'];
+  let of = 'all';
+  function renderList() {
+    const q = $('q').value.trim().toLowerCase(), fl = FILTERS.find(f => f[0] === of);
+    $('of').innerHTML = FILTERS.map(f => { const n = ORDERS.filter(f[2]).length;
+      return `<button type="button" data-of="${f[0]}" aria-pressed="${of === f[0]}" class="rounded-md px-2.5 py-1.5 text-[11px] font-medium ${of === f[0] ? 'bg-blue-600 text-white' : 'bg-white text-neutral-600 hover:bg-neutral-100'}">${f[1]} <span class="${of === f[0] ? 'text-blue-100' : 'text-neutral-400'}">${n}</span></button>`; }).join('');
+    // urut berdasarkan status: yang perlu dicek paling atas (sort stabil, tetap dikelompokkan per hari)
+    const list = ORDERS.filter(o => fl[2](o) && (o.id + o.nama + o.unit).toLowerCase().includes(q)).sort((a, b) => PRIO.indexOf(a.st) - PRIO.indexOf(b.st));
+    const grp = (title, items) => items.length ? `<div class="mb-3"><div class="flex items-center justify-between px-1 py-2 text-xs font-medium"><span>${title}</span><span class="text-neutral-400">${items.length}</span></div><div class="space-y-1.5">${items.map(o => { const on = o.id === sel; return `
+      <button type="button" data-sel="${o.id}" class="w-full rounded-md p-3 text-left transition-colors ${on ? 'bg-blue-50 text-neutral-900' : 'bg-white hover:bg-neutral-100'}">
+        <div class="flex gap-3">
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-semibold ${on ? 'bg-blue-100 text-blue-700' : 'bg-neutral-200 text-neutral-900'}">${o.nama[0]}</span>
+          <div class="min-w-0 flex-1">
+            <div class="flex justify-between text-[11px]"><span class="font-medium ${on ? 'text-blue-950' : 'text-neutral-900'}">${o.nama}</span><span class="${on ? 'text-blue-700' : 'text-neutral-400'}">${o.c[1]}</span></div>
+            <p class="mt-0.5 truncate text-sm font-medium ${on ? 'text-blue-950' : 'text-neutral-900'}">${o.unit} · ${dur(o.s, o.e)}</p>
+            <p class="truncate text-xs ${on ? 'text-blue-900/75' : 'text-neutral-500'}">${fd(o.s)}, ${hm(o.s)} · dari ${o.kota}</p>
+            <div class="mt-2 flex flex-wrap items-center gap-2">${tag(o.st)}${fine(o.st) ? `<span class="text-[11px] ${on ? 'text-blue-700' : 'text-neutral-400'}">${fine(o.st)}</span>` : ''}</div>
+          </div>
+        </div></button>`; }).join('')}</div></div>` : '';
+    $('olist').innerHTML = grp('Hari ini', list.filter(o => o.c[0] === 0)) + grp('Kemarin', list.filter(o => o.c[0] < 0))
+      || `<p class="py-8 text-center text-xs text-neutral-500">${of === 'all' && !q ? 'Belum ada order.' : 'Tidak ada order yang cocok.'}</p>`;
+  }
+
+  // ---------- Detail order ----------
+  const IC = {
+    phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+    alert: '<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+    ig: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/>',
+    tt: '<path d="M9 18a3 3 0 1 1-3-3V5h4l1 3h3v4h-3z"/>'
+  };
+  const cleanHandle = h => String(h || '').trim().replace(/^@+/, '');
+  const igUrl = h => { const u = cleanHandle(h); return u ? (/^https?:\/\//i.test(u) ? u : `https://www.instagram.com/${encodeURIComponent(u)}`) : ''; };
+  const ttUrl = h => { const u = cleanHandle(h); return u ? (/^https?:\/\//i.test(u) ? u : `https://www.tiktok.com/@${encodeURIComponent(u)}`) : ''; };
+  const ir = (ic, l, v) => `<div class="mb-1 flex items-center gap-3 rounded-md bg-neutral-50 px-3 py-2"><span class="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-blue-50 text-blue-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">${IC[ic]}</svg></span><span class="text-sm text-neutral-500">${l}</span><span class="ml-auto text-right text-sm font-medium">${esc(v) || '-'}</span></div>`;
+  const irLink = (ic, l, v, urlFn) => {
+    const url = urlFn(v);
+    if (!url) return ir(ic, l, v);
+    return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="mb-1 flex items-center gap-3 rounded-md bg-neutral-50 px-3 py-2 text-neutral-900 no-underline transition-colors hover:bg-neutral-100"><span class="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-blue-50 text-blue-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">${IC[ic]}</svg></span><span class="text-sm text-neutral-500">${l}</span><span class="ml-auto inline-flex items-center gap-1.5 text-right text-sm font-medium text-neutral-900">${esc(v)}<svg class="h-3.5 w-3.5 shrink-0 text-neutral-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></span></a>`;
+  };
+  const row = (l, v) => `<div class="mb-1 flex justify-between gap-6 rounded-md bg-neutral-50 px-3 py-2 text-sm"><span class="shrink-0 text-neutral-500">${l}</span><span class="text-right font-medium">${esc(v) || '-'}</span></div>`;
+  const sec = (t, inner) => `<details open class="rounded-md bg-white p-4"><summary class="flex cursor-pointer items-center justify-between text-sm font-semibold">${t}<svg class="chev h-4 w-4 text-neutral-500 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></summary><div class="mt-3">${inner}</div></details>`;
+  const btn = (act, label, dark) => `<button type="button" data-act="${act}" class="rounded-md px-5 py-2.5 text-xs font-medium ${dark ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white hover:bg-neutral-100'}">${label}</button>`;
+  const thumb = d => `<div><button type="button" data-img="${d.l}" data-src="${d.s || ''}" class="flex h-24 w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-md bg-neutral-100 text-[11px] text-neutral-400 hover:bg-neutral-200">${d.s ? `<img src="${d.s}" alt="${d.l}" class="h-full w-full object-cover">` : 'Image'}</button><p class="mt-1.5 text-xs text-neutral-500">${d.l}</p><span class="mt-1 inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium ${d.by === 'Kru' ? 'bg-violet-50 text-violet-900' : 'bg-blue-50 text-blue-900'}">Diunggah ${d.by === 'Kru' ? 'kru' : 'penyewa'}${d.who ? ' · ' + esc(d.who) : ''}</span></div>`;
+  const crewPick = name => (CREW.length ? '' : '<p class="mt-3 text-xs text-amber-700">Belum ada kru. Tambahkan kru di menu Kru Pengantaran.</p>')
+    + `<div class="mt-3 grid gap-2 sm:grid-cols-3">${CREW.map((c, i) => `<label class="flex cursor-pointer items-start gap-2 rounded-md bg-neutral-50 p-3 text-xs hover:bg-neutral-100 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-950"><input type="radio" name="${name}" value="${c.n}" ${i === 0 ? 'checked' : ''} class="mt-0.5 accent-blue-600"><span><b class="block">${c.n}</b><span class="text-neutral-500">${load(c.n)} tugas aktif</span></span></label>`).join('')}</div>`;
+  const demoBtn = (a, l) => `<button type="button" data-act="${a}" class="mt-3 rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600 hover:bg-neutral-200">${l}</button>`;
+
+  function detailPanel(o) {
+    let extra = '';
+    if (o.st === 'awaiting_dp') extra = sec('Menunggu bukti DP', `<p class="text-sm text-neutral-500">Penyewa sudah menerima link upload DP (${rp(DP_AMOUNT)}). Status order otomatis berubah saat bukti diunggah.</p><button type="button" data-act="simDP" class="mt-3 rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600 hover:bg-neutral-200">Simulasikan penyewa upload DP (demo)</button>`);
+    if (o.st === 'dp_uploaded') extra = sec('Tugaskan kru pengantar', `<p class="text-sm text-neutral-500">Periksa bukti DP di bagian Dokumen &amp; Bukti. Menugaskan kru akan menandai DP sebagai terverifikasi.</p>
+      ${CREW.length ? '' : '<p class="mt-3 text-xs text-amber-700">Belum ada kru. Tambahkan kru di menu Kru Pengantaran.</p>'}
+      <div class="mt-3 grid gap-2 sm:grid-cols-3">${CREW.map((c, i) => `<label class="flex cursor-pointer items-start gap-2 rounded-md bg-neutral-50 p-3 text-xs hover:bg-neutral-100 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-950"><input type="radio" name="crew" value="${c.n}" ${i === 0 ? 'checked' : ''} class="mt-0.5 accent-blue-600"><span><b class="block">${c.n}</b><span class="text-neutral-500">${load(c.n)} tugas aktif</span></span></label>`).join('')}</div>`);
+    if (o.crew) extra = sec('Pengantaran', row('Kru pengantar', o.crew) + row('Antar ke', o.alamat) + row('Waktu antar', ft(o.s)));
+    if (['notified', 'return_due', 'return_assigned', 'return_notified', 'settled'].includes(o.st)) extra += sec('Pengembalian', row('Jadwal kembali', ft(o.e)) + (o.rcrew ? row('Kru pengembalian', o.rcrew) : '') + (o.st === 'settled' ? row('Pelunasan', 'Dikonfirmasi kru') : '')
+      + (o.st === 'notified' ? `<p class="mt-2 text-xs text-neutral-500">Status otomatis berubah menjadi "Waktunya kembali" saat jadwal kembali dari formulir sewa tiba.</p>${demoBtn('simReturn', 'Simulasikan waktu kembali tiba (demo)')}` : '')
+      + (o.st === 'return_notified' ? `<p class="mt-2 text-xs text-neutral-500">Kru memperbarui status lunas dan mengunggah bukti pelunasan lewat aplikasi kru. Bukti muncul di Dokumen &amp; Bukti dengan label kru. Sisa pembayaran: ${rp(remain(o))}.</p>${demoBtn('simSettle', 'Simulasikan kru konfirmasi lunas + upload bukti (demo)')}` : ''));
+    if (o.st === 'return_due') extra += sec('Tugaskan kru pengembalian', `<p class="text-sm text-neutral-500">Pilih kru yang akan mengambil motor dan menerima pelunasan dari penyewa.</p>${crewPick('rcrew')}`);
+    return `<div class="space-y-2">
+      <section class="rounded-md bg-white p-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-blue-50 text-base font-semibold text-blue-700">${o.nama[0]}</span>
+            <div><h3 class="text-lg font-semibold leading-tight">${o.nama}</h3><p class="text-xs text-neutral-500">${o.email}</p></div>
+          </div>
+          <div class="flex items-center gap-3 rounded-md bg-neutral-100 px-3 py-2 text-xs"><span class="text-neutral-600">Status</span>${tag(o.st)}${fine(o.st) ? `<span class="text-neutral-500">${fine(o.st)}</span>` : ''}</div>
+        </div>
+        <div class="mt-3">${ir('phone', 'WhatsApp', o.wa)}${ir('alert', 'Kontak darurat', `${o.ec[0]} (${o.ec[1]})`)}${irLink('ig', 'Instagram', o.ig, igUrl)}${irLink('tt', 'TikTok', o.tt, ttUrl)}</div>
+      </section>
+      ${sec('Unit &amp; Jadwal', row('Unit', o.unit) + row('Tanggal sewa', ft(o.s)) + row('Tanggal kembali', ft(o.e)) + row('Durasi', dur(o.s, o.e)))}
+      ${sec('Detail Sewa', (() => {
+        const q = (o.lat != null && o.lng != null) ? `${o.lat},${o.lng}` : encodeURIComponent(o.alamat);
+        return `<p class="text-xs text-neutral-500">Tujuan sewa</p><p class="mb-2 mt-1 text-sm leading-relaxed">${esc(o.tujuan)}</p>`
+          + row('Area tujuan', o.area)
+          + row('Alamat hotel / tinggal', o.alamat)
+          + `<div class="mt-3 overflow-hidden rounded-md bg-neutral-100">
+              <iframe title="Lokasi pengiriman" loading="lazy" src="https://maps.google.com/maps?q=${q}&z=15&output=embed&hl=id" class="h-52 w-full border-0"></iframe>
+            </div>
+            <a href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1.5 rounded-md bg-neutral-100 px-3 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-200">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3l7 17-7-4-7 4z"/></svg>
+              Buka di Google Maps
+            </a>`;
+      })())}
+      ${sec('Dokumen &amp; Bukti', `<div class="grid grid-cols-2 gap-3 sm:grid-cols-3">${o.docs.map(thumb).join('')}</div><p class="mt-3 text-[11px] text-neutral-400">Klik gambar untuk memperbesar. Dokumen bertambah otomatis saat penyewa mengunggah berkas baru.</p>`)}
+      ${extra}</div>`;
+  }
+
+  function invoiceHTML(o) {
+    const c = calc(o), pays = TRX.filter(t => t.id === o.id), got = pays.filter(paid).reduce((a, t) => a + t.a, 0), pend = pays.some(t => !paid(t));
+    const [sl, sc] = got >= c.total ? ['Lunas', 'bg-green-50 text-green-900'] : pend ? ['DP menunggu verifikasi', 'bg-amber-50 text-amber-900'] : got ? ['Belum lunas', 'bg-blue-50 text-blue-900'] : ['Belum ada pembayaran', 'bg-neutral-100 text-neutral-700'];
+    const d = new Date(today); d.setDate(d.getDate() + o.c[0]);
+    return `<div class="space-y-2">
+      <section class="rounded-md bg-white p-4"><div class="flex flex-wrap items-start justify-between gap-3"><div><h3 class="text-lg font-semibold">INV-${o.id.slice(4)}</h3><p class="text-xs text-neutral-500">Diterbitkan ${fd(d)} · ${o.nama} · ${o.wa}</p></div><span class="rounded-md px-2 py-0.5 text-[10px] font-medium ${sc}">${sl}</span></div></section>
+      <section class="rounded-md bg-white p-4"><div class="overflow-x-auto"><table class="w-full min-w-[420px] text-left text-xs"><thead class="bg-neutral-50 text-neutral-500"><tr><th class="rounded-l-md px-3 py-2 font-medium">Keterangan</th><th class="px-3 py-2 font-medium">Qty</th><th class="px-3 py-2 font-medium">Harga</th><th class="rounded-r-md px-3 py-2 text-right font-medium">Subtotal</th></tr></thead>
+        <tbody class="[&>tr:nth-child(even)]:bg-neutral-50">${c.items.map(i => `<tr><td class="rounded-l-md px-3 py-2.5">${o.unit} · ${i.label}</td><td class="px-3 py-2.5">${i.qty}×</td><td class="px-3 py-2.5">${rp(i.price)}</td><td class="rounded-r-md px-3 py-2.5 text-right font-medium">${rp(i.sub)}</td></tr>`).join('')}</tbody></table></div></section>
+      <section class="rounded-md bg-white p-4"><div class="ml-auto max-w-xs space-y-1 text-xs">
+        <div class="flex justify-between rounded-md bg-neutral-50 px-3 py-2"><span class="text-neutral-500">Total biaya</span><b>${rp(c.total)}</b></div>
+        ${pays.map(t => `<div class="flex justify-between rounded-md bg-neutral-50 px-3 py-2"><span class="text-neutral-500">${t.k} · ${t.s}</span><span>${rp(t.a)}</span></div>`).join('')}
+        <div class="flex justify-between rounded-md bg-blue-50 px-3 py-2 text-blue-950"><span class="font-medium">Sisa pembayaran</span><b>${rp(Math.max(0, c.total - got))}</b></div></div></section></div>`;
+  }
+
+  function renderDetail() {
+    const o = get(), c = calc(o);
+    const tabs = `<div class="inline-flex rounded-md bg-neutral-200/70 p-1 text-xs">${[['detail', 'Detail Order'], ['invoice', 'Invoice'], ['log', 'Riwayat Aktivitas']].map(([k, l]) => `<button type="button" data-tab="${k}" class="rounded-md px-4 py-2 font-medium ${tab === k ? 'bg-white' : 'text-neutral-500'}">${l}</button>`).join('')}</div>`;
+    const body = tab === 'invoice' ? invoiceHTML(o)
+      : tab === 'log' ? `<ul class="space-y-1 rounded-md bg-white p-4">${o.log.map(l => `<li class="flex gap-4 rounded-md bg-neutral-50 px-3 py-3 text-xs"><span class="w-12 shrink-0 text-neutral-400">${l.t}</span><span>${esc(l.x)}</span></li>`).join('')}</ul>`
+      : detailPanel(o);
+    const pri = PRI[o.st];
+    $('detail').innerHTML = `<div class="rounded-md bg-neutral-50 p-3">
+      <section class="rounded-md bg-white p-5">
+        <h2 class="text-4xl font-medium tracking-tight">#${o.id}</h2>
+        <p class="mt-2 text-sm text-neutral-500">${SUB[o.st]}</p>
+        <div class="mt-4 rounded-md bg-neutral-50 px-4 py-3"><p class="text-xs text-neutral-500">Total biaya</p><p class="text-2xl font-semibold tracking-tight text-neutral-900">${rp(c.total)}</p><p class="text-xs text-neutral-500">Sewa ${dur(o.s, o.e)} · ${o.unit}</p></div>
+      </section>
+      <div class="my-3">${tabs}</div>${body}
+      <div class="mt-3 flex items-center justify-between gap-2">${btn('contact', 'Kontak')}${pri ? btn(pri[0], pri[1], 1) : ''}</div></div>`;
+  }
+
+  // ---------- Template pesan WhatsApp ----------
+  const tplDP = o => `Halo ${o.nama}, pesanan sewa motor kamu di Traverent Bandung (${o.id}) sudah kami terima.
+
+Unit: ${o.unit}
+Sewa: ${ft(o.s)}
+Kembali: ${ft(o.e)}
+Total biaya: ${rp(calc(o).total)}
+
+Untuk mengamankan unit, silakan bayar DP ${rp(DP_AMOUNT)} lalu unggah bukti transfer lewat link berikut:
+${DP_URL}${o.id}
+
+Setelah bukti DP kami terima, kru akan kami jadwalkan untuk mengantar motor. Terima kasih!`;
+  const tplNotify = o => `Halo ${o.nama}, DP untuk pesanan ${o.id} sudah kami terima dan motor siap diantar.
+
+Unit: ${o.unit}
+Sewa: ${ft(o.s)}
+Kembali: ${ft(o.e)}
+Diantar ke: ${o.alamat}
+Kru pengantar: ${o.crew} (${(CREW.find(c => c.n === o.crew) || {}).wa || '-'})
+
+Kru kami akan mengantar motor sesuai jadwal. Mohon siapkan KTP asli saat serah terima. Terima kasih sudah memilih Traverent Bandung!`;
+  const tplReturn = o => `Halo ${o.nama}, kami dari Traverent Bandung. Waktu pengembalian motor untuk pesanan ${o.id} sudah tiba.
+
+Unit: ${o.unit}
+Jadwal kembali: ${ft(o.e)}
+Lokasi pengambilan: ${o.alamat}
+Kru: ${o.rcrew} (${(CREW.find(c => c.n === o.rcrew) || {}).wa || '-'})
+Sisa pembayaran: ${rp(remain(o))}
+
+Mohon siapkan motor beserta kelengkapannya (kunci, helm, dan perlengkapan lain) untuk diserahkan kepada kru kami, serta pelunasan sisa pembayaran kepada kru saat serah terima.
+
+Setelah motor diserahkan, konfirmasi pengembalian lewat link berikut:
+${RETURN_URL}${o.id}
+
+Jika ada kendala, silakan balas pesan ini. Terima kasih sudah memilih Traverent Bandung!`;
+  // Cek otomatis: saat jadwal kembali (dari formulir sewa) tiba, status berubah ke "Waktunya kembali"
+  function syncReturn() {
+    const now = new Date(); let ch = false;
+    ORDERS.forEach(o => { if (o.st === 'notified' && now >= o.e) { o.st = 'return_due'; logNow(o, 'Jadwal kembali tiba (sesuai formulir sewa)'); ch = true; } });
+    return ch;
+  }
+
+  // ---------- Aksi admin ----------
+  function act(k) {
+    const o = get();
+    if (k === 'contact') return waOpen(o, '');   // buka chat WhatsApp tanpa template
+    if (k === 'simReturn') { o.st = 'return_due'; logNow(o, 'Jadwal kembali tiba (sesuai formulir sewa)'); }
+    if (k === 'assignReturn') {
+      const r = document.querySelector('input[name=rcrew]:checked'); if (!r) return;
+      o.rcrew = r.value; o.st = 'return_assigned'; logNow(o, 'Kru pengembalian ditugaskan ke ' + o.rcrew);
+    }
+    if (k === 'notifyReturn') { waOpen(o, tplReturn(o)); if (o.st === 'return_assigned') { o.st = 'return_notified'; logNow(o, 'Notifikasi pengembalian dikirim ke penyewa via WhatsApp'); } }
+    if (k === 'simSettle') {   // demo: di produksi, kru melakukan ini dari aplikasi kru
+      const sisa = remain(o);
+      if (sisa > 0) TRX.push({ d: 0, id: o.id, n: o.nama, k: 'Pelunasan', a: sisa, s: 'Lunas' });
+      o.docs.push({ l: 'Bukti pelunasan', s: '', by: 'Kru', who: o.rcrew }); o.st = 'settled';
+      logNow(o, `Kru ${o.rcrew} menandai pesanan lunas dan mengunggah bukti pelunasan`);
+    }
+    if (k === 'accept') { o.st = 'accepted'; logNow(o, 'Pesanan diterima admin'); }
+    if (k === 'sendDP') { waOpen(o, tplDP(o)); if (o.st === 'accepted') { o.st = 'awaiting_dp'; logNow(o, 'Link upload DP dikirim ke penyewa via WhatsApp'); } }
+    if (k === 'simDP') {   // demo: di produksi, status berubah otomatis saat penyewa upload lewat link DP
+      o.st = 'dp_uploaded'; o.docs.push({ l: 'Bukti DP', s: '', by: 'Penyewa' });
+      TRX.push({ d: 0, id: o.id, n: o.nama, k: 'DP', a: DP_AMOUNT, s: 'Menunggu verifikasi' }); logNow(o, 'Penyewa mengunggah bukti DP');
+    }
+    if (k === 'assign') {
+      const r = document.querySelector('input[name=crew]:checked'); if (!r) return;
+      o.crew = r.value; o.st = 'assigned';
+      const t = TRX.find(t => t.id === o.id && t.k === 'DP'); if (t) t.s = 'Diterima';
+      logNow(o, 'DP diverifikasi'); logNow(o, 'Ditugaskan ke ' + o.crew);
+    }
+    if (k === 'notify') { waOpen(o, tplNotify(o)); if (o.st === 'assigned') { logNow(o, 'Notifikasi dikirim ke penyewa via WhatsApp'); o.st = 'notified'; } }
+    refresh();
+  }
+
+  // ---------- Kru ----------
+  function renderCrew() {
+    $('crew').innerHTML = CREW.map(c => {
+      const jobs = jobsOf(c.n);
+      return `<article class="space-y-1.5 rounded-md bg-neutral-50 p-2">
+        <div class="flex items-start justify-between gap-2 rounded-md bg-white p-3"><div><h3 class="text-sm font-semibold">${c.n}</h3><p class="text-xs text-neutral-500">${c.wa}</p></div>
+          <span class="rounded-md px-2 py-0.5 text-[10px] font-medium ${jobs.length ? 'bg-violet-50 text-violet-900' : 'bg-green-50 text-green-900'}">${jobs.length ? jobs.length + ' tugas' : 'Tersedia'}</span></div>
+        <div class="space-y-1.5">${jobs.length ? jobs.map(j => `<div class="rounded-md bg-white p-3 text-xs"><p class="font-medium">${j.o.id} · ${j.o.unit} · ${j.tipe}</p><p class="mt-0.5 text-neutral-500">${j.tipe === 'Antar' ? 'Antar ke' : 'Ambil di'} ${esc(j.o.alamat)}</p><p class="text-neutral-500">${ft(j.at)}</p></div>`).join('') : '<p class="rounded-md bg-white p-3 text-xs text-neutral-400">Belum ada tugas pengantaran.</p>'}</div>
+        <div class="flex gap-1.5">
+          <button type="button" data-do="crewEdit" data-id="${c.id}" class="flex-1 rounded-md bg-white py-2 text-xs font-medium hover:bg-neutral-100">Edit</button>
+          <button type="button" data-do="crewDel" data-id="${c.id}" class="flex-1 rounded-md bg-red-50 py-2 text-xs font-medium text-red-700 hover:bg-red-100">Hapus</button>
+        </div></article>`;
+    }).join('') || '<p class="col-span-full py-8 text-center text-xs text-neutral-500">Belum ada kru. Klik Tambah kru untuk mengundang.</p>';
+  }
+
+  // ---------- Finance ----------
+  function renderFinance() {
+    const [a, b, c] = finSum();
+    $('fin-stats').innerHTML = card(a[0], rp(a[1]), 'DP dan pelunasan diterima', 'text-green-700', 'money')
+      + card(b[0], rp(b[1]), 'Total pemasukan', 'text-green-700', 'money')
+      + card(c[0], rp(c[1]), 'Bukti DP belum dicek', 'text-amber-700', 'alert');
+    $('fin-rows').innerHTML = TRX.slice().sort((a, b) => b.d - a.d).map(t => { const d = new Date(today); d.setDate(d.getDate() + t.d);
+      return `<tr data-trx="${TRX.indexOf(t)}" tabindex="0" class="cursor-pointer"><td class="px-4 py-3 text-neutral-500">${d.getDate()} ${BULAN[d.getMonth()].slice(0, 3)}</td><td class="px-4 py-3 font-medium">${t.id}</td><td class="px-4 py-3">${t.n}</td><td class="px-4 py-3">${t.k}</td><td class="px-4 py-3 font-medium">${rp(t.a)}</td><td class="px-4 py-3"><span class="rounded-md px-2 py-0.5 text-[10px] font-medium ${TLBL[t.s]}">${t.s}</span></td></tr>`; }).join('');
+  }
+  const TLBL = { 'Lunas': 'bg-green-50 text-green-900', 'Diterima': 'bg-green-50 text-green-900', 'Menunggu verifikasi': 'bg-amber-50 text-amber-900' };
+  const trxDate = t => { const d = new Date(today); d.setDate(d.getDate() + t.d); return d; };
+  const finSum = () => { const s = f => TRX.filter(f).reduce((a, t) => a + t.a, 0); return [['Penghasilan hari ini', s(t => t.d === 0 && paid(t))], ['7 hari terakhir', s(t => t.d >= -6 && paid(t))], ['Menunggu verifikasi', s(t => !paid(t))]]; };
+
+  // ---------- Unit Motor ----------
+  // order = id order terkait (dummy). Status turunan dari order, kecuali servis.
+  const FLEET = [
+    { n: 'Honda New Beat', plat: 'D 4521 ABX', y: 2021, cc: 110, img: '' },
+    { n: 'Honda New Beat', plat: 'D 4522 ABX', y: 2020, cc: 110, servis: true, img: '' },
+    { n: 'Honda Vario 125', plat: 'D 5120 ACF', y: 2020, cc: 125, img: '' },
+    { n: 'Yamaha Gear 125', plat: 'D 3344 ADG', y: 2022, cc: 125, order: 'ORD-29098', img: '' },
+    { n: 'Honda Scoopy', plat: 'D 6677 AEH', y: 2021, cc: 110, order: 'ORD-29095', img: '' },
+    { n: 'Honda Beat Street', plat: 'D 7788 AFJ', y: 2019, cc: 110, order: 'ORD-29090', img: '' },
+    { n: 'Honda Vario 160', plat: 'D 8899 AGK', y: 2022, cc: 160, order: 'ORD-29087', img: '' }
+  ];
+  FLEET.forEach((u, i) => u.id = 'U' + (i + 1)); let unitSeq = FLEET.length;
+  const US = { Tersedia: 'bg-green-50 text-green-900', Dipesan: 'bg-blue-50 text-blue-900', Disewa: 'bg-violet-50 text-violet-900', Servis: 'bg-amber-50 text-amber-900' };
+  const fleetStatus = u => { if (u.servis) return 'Servis'; const o = ORDERS.find(x => x.id === u.order); return !o || o.st === 'settled' ? 'Tersedia' : ['notified', 'return_due', 'return_assigned', 'return_notified'].includes(o.st) ? 'Disewa' : 'Dipesan'; };
+  let uf = 'Semua';
+  function renderUnits() {
+    const cnt = s => s === 'Semua' ? FLEET.length : FLEET.filter(u => fleetStatus(u) === s).length;
+    $('unit-filter').innerHTML = ['Semua', 'Tersedia', 'Dipesan', 'Disewa', 'Servis'].map(s => `<button type="button" data-uf="${s}" class="rounded-md px-3 py-1.5 text-xs font-medium ${uf === s ? 'bg-blue-600 text-white' : 'bg-neutral-100 hover:bg-neutral-200'}">${s} · ${cnt(s)}</button>`).join('');
+    $('unit-grid').innerHTML = FLEET.filter(u => uf === 'Semua' || fleetStatus(u) === uf).map(u => {
+      const st = fleetStatus(u), o = ORDERS.find(x => x.id === u.order), r = RATES[u.n];
+      const imgBlock = u.img
+        ? `<div class="h-28 overflow-hidden rounded-md bg-neutral-200/60"><img src="${esc(u.img)}" alt="${esc(u.n)}" class="h-full w-full object-cover"></div>`
+        : `<div class="flex h-28 items-center justify-center rounded-md bg-neutral-200/60 text-xs text-neutral-400">Motor image</div>`;
+      return `<article class="space-y-1.5 rounded-md bg-neutral-50 p-2">
+        ${imgBlock}
+        <div class="rounded-md bg-white p-3"><div class="flex items-start justify-between gap-2"><div><h3 class="text-sm font-semibold">${u.n}</h3><p class="text-xs text-neutral-500">${u.plat}</p></div><span class="rounded-md px-2 py-0.5 text-[10px] font-medium ${US[st]}">${st}</span></div>
+        <div class="mt-2 flex flex-wrap gap-1.5">${['Tahun ' + u.y, 'Matic', u.cc + ' cc'].map(t => `<span class="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-900">${t}</span>`).join('')}</div></div>
+        <div class="space-y-1.5 text-xs">
+          <div class="flex justify-between gap-3 rounded-md bg-white px-3 py-2.5"><span class="text-neutral-500">Weekday 12 / 24 jam</span><span class="text-right font-medium">${rp(r[0][0])} / ${rp(r[0][1])}</span></div>
+          <div class="flex justify-between gap-3 rounded-md bg-white px-3 py-2.5"><span class="text-neutral-500">Weekend 12 / 24 jam</span><span class="text-right font-medium">${rp(r[1][0])} / ${rp(r[1][1])}</span></div>
+          <div class="flex justify-between rounded-md bg-white px-3 py-2.5"><span class="text-neutral-500">Order terkait</span>${o ? `<button type="button" data-order="${o.id}" class="font-medium text-blue-600 hover:underline">${o.id}</button>` : '<span class="text-neutral-400">-</span>'}</div>
+          ${o ? `<div class="flex justify-between rounded-md bg-white px-3 py-2.5"><span class="text-neutral-500">Jadwal</span><span class="font-medium">${fd(o.s)}, ${hm(o.s)}</span></div>` : ''}
+        </div>
+        <div class="flex gap-1.5">
+          <button type="button" data-do="unitEdit" data-id="${u.id}" class="flex-1 rounded-md bg-white py-2 text-xs font-medium hover:bg-neutral-100">Edit</button>
+          <button type="button" data-do="unitDel" data-id="${u.id}" class="flex-1 rounded-md bg-red-50 py-2 text-xs font-medium text-red-700 hover:bg-red-100">Hapus</button>
+        </div></article>`;
+    }).join('') || '<p class="col-span-full py-8 text-center text-xs text-neutral-500">Tidak ada unit dengan status ini.</p>';
+  }
+
+  // ---------- Calendar ----------
+  let cm = new Date(today.getFullYear(), today.getMonth(), 1), cf = 'all';
+  function renderCal() {
+    const y = cm.getFullYear(), m = cm.getMonth(), lead = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate();
+    const day = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(), filler = '<div class="min-h-[96px] rounded-md bg-neutral-100/60"></div>';
+    $('cal-title').textContent = `${BULAN[m]} ${y}`;
+    $('cal-legend').innerHTML = [['all', 'Semua', ''], ...Object.keys(GROUPS).map(k => [k, GROUPS[k][0], GROUPS[k][2]])].map(([k, l, dot]) => {
+      const n = ORDERS.filter(o => k === 'all' || grpOf(o.st) === k).length, on = cf === k;
+      return `<button type="button" data-cf="${k}" aria-pressed="${on}" class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium ${on ? 'bg-blue-600 text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}">${dot ? `<span class="h-1.5 w-1.5 rounded-full ${dot}"></span>` : ''}${l} <span class="${on ? 'text-blue-100' : 'text-neutral-400'}">${n}</span></button>`; }).join('');
+    let cells = filler.repeat(lead);
+    for (let d = 1; d <= n; d++) {
+      const t = new Date(y, m, d).getTime(), ev = ORDERS.filter(o => (cf === 'all' || grpOf(o.st) === cf) && day(o.s) <= t && t <= day(o.e));
+      const chips = ev.slice(0, 3).map(o => `<button type="button" data-order="${o.id}" title="${o.id} · ${o.nama} · ${o.unit}" class="block w-full truncate rounded-md px-1.5 py-0.5 text-left text-[10px] font-medium ${GROUPS[grpOf(o.st)][1]}">${day(o.s) === t ? hm(o.s) + ' Antar' : day(o.e) === t ? hm(o.e) + ' Kembali' : o.unit} · ${o.nama.split(' ')[0]}</button>`).join('');
+      cells += `<div class="min-h-[96px] rounded-md bg-white p-1.5"><span class="inline-grid h-6 w-6 place-items-center rounded-md text-xs ${t === today.getTime() ? 'bg-blue-600 font-semibold text-white' : 'text-neutral-600'}">${d}</span><div class="mt-1 space-y-1">${chips}${ev.length > 3 ? `<p class="px-1 text-[10px] text-neutral-400">+${ev.length - 3} lagi</p>` : ''}</div></div>`;
+    }
+    $('cal-grid').innerHTML = cells + filler.repeat((7 - (lead + n) % 7) % 7);
+  }
+
+  // ---------- Modal bersama ----------
+  let unitDraftImg = '', unitUpState = null, unitUpTimer = null;
+  function clearUnitUpload() {
+    if (unitUpTimer) { clearInterval(unitUpTimer); unitUpTimer = null; }
+    if (unitUpState && unitUpState.url) { URL.revokeObjectURL(unitUpState.url); }
+    unitUpState = null;
+  }
+
+  function openModal(title, body, foot = '', size = 'max-w-xl') {
+    $('m-title').textContent = title;
+    $('m-box').className = `m-slide flex h-full w-full ${size} flex-col overflow-hidden rounded-md bg-white`;
+    $('m-body').innerHTML = body; $('m-foot').innerHTML = foot;
+    $('m-foot').classList.toggle('hidden', !foot); $('m-foot').classList.toggle('flex', !!foot);
+    $('modal').classList.remove('hidden'); $('modal').classList.add('flex');
+    const f = $('m-body').querySelector('input:not([type=checkbox]):not([type=file]),select'); if (f) f.focus();
+  }
+  const closeModal = () => { clearUnitUpload(); $('modal').classList.add('hidden'); $('modal').classList.remove('flex'); };
+  const merr = msg => { const e = $('m-err'); if (e) { e.textContent = msg; e.classList.remove('hidden'); } };
+  const ERR = '<p id="m-err" class="mt-3 hidden text-xs text-red-600"></p>';
+  const mb = (k, label, id = '', kind = 'light') => `<button type="button" data-do="${k}" data-id="${id}" ${kind === 'dark' || kind === 'danger' ? 'data-primary' : ''} class="rounded-md px-5 py-2.5 text-xs font-medium ${{ dark: 'bg-blue-600 text-white hover:bg-blue-700', danger: 'bg-red-600 text-white hover:bg-red-700', light: 'bg-neutral-100 hover:bg-neutral-200' }[kind]}">${label}</button>`;
+  const cancelBtn = '<button type="button" data-m-close class="rounded-md bg-neutral-100 px-5 py-2.5 text-xs font-medium hover:bg-neutral-200">Batal</button>';
+  const fld = (id, label, val = '', attrs = '') => `<label class="block text-xs text-neutral-500">${label}<input id="${id}" value="${esc(val)}" ${attrs} class="mt-1 w-full rounded-md bg-neutral-100 px-3 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-blue-300"></label>`;
+  const mcard = (title, inner) => `<div class="rounded-md bg-neutral-100 p-4"><p class="text-sm font-semibold">${title}</p><div class="mt-2">${inner}</div></div>`;
+  const info = (title, msg) => openModal(title, `<p class="text-sm text-neutral-600">${msg}</p>`, '<button type="button" data-m-close class="rounded-md bg-blue-600 px-5 py-2.5 text-xs font-medium text-white hover:bg-blue-700">Tutup</button>');
+
+  // Modal gambar dokumen
+  function openLb(b) {
+    openModal(b.dataset.img, `<div class="flex min-h-[320px] items-center justify-center rounded-md bg-neutral-100 text-sm text-neutral-400">${b.dataset.src ? `<img src="${esc(b.dataset.src)}" alt="" class="max-h-[65vh] max-w-full object-contain">` : esc(b.dataset.img)}</div>`, '', 'max-w-3xl');
+  }
+
+  // ---------- Kru: tambah (undang via WhatsApp), ubah, hapus ----------
+  const tplInvite = () => `Halo, kami dari Traverent Bandung. Kamu diundang bergabung sebagai kru pengantaran motor.
+
+Silakan daftar lewat link berikut:
+${CREW_URL}
+
+Setelah mendaftar, admin akan memeriksa datamu. Terima kasih!`;
+  function crewAdd() {
+    openModal('Tambah kru', `<p class="text-sm text-neutral-500">Masukkan nomor WhatsApp calon kru. WhatsApp Web akan terbuka dengan pesan undangan dan link pendaftaran.</p>
+      <div class="mt-4">${fld('inv-wa', 'Nomor WhatsApp', '', 'type="tel" inputmode="tel" placeholder="08123456789"')}</div>${ERR}
+      <p class="mt-4 text-xs text-neutral-500">Pratinjau pesan</p>
+      <div class="mt-1 whitespace-pre-line rounded-md bg-neutral-100 p-3 text-xs leading-relaxed">${esc(tplInvite())}</div>`,
+      cancelBtn + mb('crewInvite', 'Kirim undangan via WhatsApp', '', 'dark'));
+  }
+  function crewInvite() {
+    const n = $('inv-wa').value.replace(/\D/g, '');
+    if (n.length < 9) return merr('Masukkan nomor WhatsApp yang valid (minimal 9 digit).');
+    waTo(n, tplInvite()); closeModal();
+  }
+  function crewForm(id) {
+    const c = CREW.find(x => x.id === id);
+    openModal('Ubah data kru', `<div class="space-y-4">${fld('c-n', 'Nama kru', c.n)}${fld('c-wa', 'Nomor WhatsApp', c.wa, 'type="tel" inputmode="tel"')}</div>${ERR}`,
+      cancelBtn + mb('crewSave', 'Simpan perubahan', id, 'dark'));
+  }
+  function crewSave(id) {
+    const c = CREW.find(x => x.id === id), n = $('c-n').value.trim(), wa = $('c-wa').value.trim();
+    if (!n || wa.replace(/\D/g, '').length < 9) return merr('Nama wajib diisi dan nomor WhatsApp harus valid.');
+    if (CREW.some(x => x.id !== id && x.n.toLowerCase() === n.toLowerCase())) return merr('Nama kru sudah dipakai kru lain.');
+    ORDERS.forEach(o => { if (o.crew === c.n) o.crew = n; if (o.rcrew === c.n) o.rcrew = n; });
+    c.n = n; c.wa = wa; closeModal(); refresh();
+  }
+  function crewDelAsk(id) {
+    const c = CREW.find(x => x.id === id), n = load(c.n);
+    if (n) return openModal('Kru belum bisa dihapus', `<p class="text-sm text-neutral-600"><b>${esc(c.n)}</b> masih punya ${n} tugas pengantaran aktif. Selesaikan tugas tersebut lebih dulu sebelum menghapus kru.</p>`,
+      '<button type="button" data-m-close class="rounded-md bg-blue-600 px-5 py-2.5 text-xs font-medium text-white hover:bg-blue-700">Mengerti</button>');
+    openModal('Hapus kru?', `<p class="text-sm text-neutral-600">Kru <b>${esc(c.n)}</b> (${esc(c.wa)}) akan dihapus dari daftar. Tindakan ini tidak bisa dibatalkan.</p>`, cancelBtn + mb('crewDelOk', 'Ya, hapus', id, 'danger'));
+  }
+
+  // ---------- Unit motor: upload 1 gambar (gaya PWA Kru) + tambah, ubah, hapus ----------
+  const unitStackIll = () => `<div class="relative h-24 w-32"><div class="absolute left-0 top-4 h-20 w-16 -rotate-6 rounded-md bg-neutral-200/70"></div><div class="absolute right-0 top-4 h-20 w-16 rotate-6 rounded-md bg-neutral-200/70"></div><div class="relative mx-auto grid h-20 w-16 place-items-center rounded-md bg-white text-neutral-400"><svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5-8 8"/></svg></div></div>`;
+
+  function renderUnitImgField() {
+    const box = $('u-img-box');
+    if (!box) return;
+    if (unitUpState) {
+      box.innerHTML = `<div class="relative overflow-hidden rounded-md bg-neutral-200/80 px-4 pt-4 pb-0">
+        <div class="relative overflow-hidden rounded-t-md bg-white">
+          <img src="${unitUpState.url}" alt="Mengunggah foto motor" class="h-44 w-full object-cover">
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent"></div>
+        </div>
+        <div id="u-up-pct" class="pointer-events-none absolute inset-x-0 bottom-3.5 text-center text-lg font-bold tracking-tight text-neutral-900 tabular-nums">${unitUpState.pct}%</div>
+        <div class="absolute inset-x-0 bottom-0 h-1.5 bg-neutral-300/60">
+          <div id="u-up-bar" class="h-full rounded-r-md bg-blue-600 transition-all duration-150 ease-out" style="width:${unitUpState.pct}%"></div>
+        </div>
+      </div>`;
+      return;
+    }
+    if (unitDraftImg) {
+      box.innerHTML = `<div class="rounded-md bg-neutral-100 p-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-neutral-900">Foto unit motor (1/1)</span>
+          <span class="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-900">Terpasang</span>
+        </div>
+        <div class="relative mt-2.5 overflow-hidden rounded-md bg-white">
+          <img src="${esc(unitDraftImg)}" alt="Preview foto motor" class="h-44 w-full object-cover">
+        </div>
+        <div class="mt-2.5 flex gap-2">
+          <button type="button" data-u-pick class="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-white py-2 text-xs font-medium text-neutral-900 hover:bg-neutral-50">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14.9-4M20 12a8 8 0 0 1-14.9 4M19 4v4h-4M5 20v-4h4"/></svg>Ganti gambar</button>
+          <button type="button" data-u-clear class="rounded-md bg-red-50 px-3 py-2 text-xs font-medium text-red-700 hover:bg-red-100">Hapus</button>
+        </div>
+      </div>`;
+      return;
+    }
+    box.innerHTML = `<div class="flex flex-col items-center rounded-md bg-neutral-100 px-6 py-6 text-center">
+      ${unitStackIll()}
+      <h4 class="mt-3 text-xs font-semibold text-neutral-900">Belum ada foto motor</h4>
+      <p class="mt-1 text-[11px] text-neutral-500">Unggah 1 foto unit motor. Foto dapat diganti kapan saja lewat tombol Edit.</p>
+      <button type="button" data-u-pick class="mt-3 flex items-center gap-1.5 rounded-md bg-blue-600 px-3.5 py-2 text-xs font-medium text-white hover:bg-blue-700">
+        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Upload gambar</button>
+    </div>`;
+  }
+
+  function handleUnitFileSelect(file) {
+    if (!file) return;
+    if (!file.type || !file.type.startsWith('image/')) {
+      return merr('File yang dipilih harus berupa gambar (JPG, PNG, atau WebP).');
+    }
+    const errEl = $('m-err');
+    if (errEl) errEl.classList.add('hidden');
+    clearUnitUpload();
+    const url = URL.createObjectURL(file);
+    unitUpState = { url, pct: 0 };
+    renderUnitImgField();
+
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 900 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k);
+      c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const dataUrl = c.toDataURL('image/jpeg', 0.78);
+
+      const steps = [25, 52, 74, 92, 100];
+      let idx = 0;
+      unitUpTimer = setInterval(() => {
+        if (!unitUpState) { clearInterval(unitUpTimer); unitUpTimer = null; return; }
+        unitUpState.pct = steps[idx];
+        const pctEl = $('u-up-pct'), barEl = $('u-up-bar');
+        if (pctEl) pctEl.textContent = unitUpState.pct + '%';
+        if (barEl) barEl.style.width = unitUpState.pct + '%';
+        idx++;
+        if (idx >= steps.length) {
+          clearInterval(unitUpTimer);
+          unitUpTimer = null;
+          setTimeout(() => {
+            clearUnitUpload();
+            unitDraftImg = dataUrl;
+            renderUnitImgField();
+          }, 200);
+        }
+      }, 130);
+    };
+    img.onerror = () => {
+      clearUnitUpload();
+      renderUnitImgField();
+      merr('Gagal memuat gambar. Pilih file gambar lain.');
+    };
+    img.src = url;
+  }
+
+  function unitForm(id) {
+    clearUnitUpload();
+    const u = id ? FLEET.find(x => x.id === id) : { n: '', plat: '', y: today.getFullYear(), cc: 110, img: '' }, r = RATES[u.n] || [['', ''], ['', '']];
+    unitDraftImg = u.img || '';
+    openModal(id ? 'Ubah unit motor' : 'Tambah unit motor', `<div class="space-y-4">
+      <div>
+        <p class="mb-1.5 text-xs text-neutral-500">Foto unit motor (maks. 1 gambar)</p>
+        <input id="u-file" type="file" accept="image/*" class="hidden">
+        <div id="u-img-box"></div>
+      </div>
+      <label class="block text-xs text-neutral-500">Model motor<input id="u-n" list="u-models" value="${esc(u.n)}" placeholder="Contoh: Honda Vario 125" class="mt-1 w-full rounded-md bg-neutral-100 px-3 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-blue-300"></label>
+      <datalist id="u-models">${Object.keys(RATES).map(k => `<option value="${esc(k)}">`).join('')}</datalist>
+      ${fld('u-plat', 'Plat nomor', u.plat, 'placeholder="D 1234 ABC"')}
+      <div class="grid grid-cols-2 gap-3">${fld('u-y', 'Tahun', u.y, 'type="number"')}${fld('u-cc', 'Kapasitas mesin (cc)', u.cc, 'type="number"')}</div>
+      <div><p class="text-xs text-neutral-500">Tarif (Rp)</p><div class="mt-1 grid grid-cols-2 gap-3">${fld('u-r1', 'Weekday 12 jam', r[0][0], 'type="number"')}${fld('u-r2', 'Weekday 24 jam', r[0][1], 'type="number"')}${fld('u-r3', 'Weekend 12 jam', r[1][0], 'type="number"')}${fld('u-r4', 'Weekend 24 jam', r[1][1], 'type="number"')}</div>
+        <p class="mt-1.5 text-[11px] text-neutral-400">Tarif berlaku untuk semua unit dengan model yang sama.</p></div>
+      <label class="flex items-center gap-2 text-sm"><input id="u-servis" type="checkbox" class="accent-blue-600" ${u.servis ? 'checked' : ''}>Unit sedang servis</label></div>${ERR}`,
+      cancelBtn + mb('unitSave', id ? 'Simpan perubahan' : 'Tambah unit', id || '', 'dark'));
+    renderUnitImgField();
+  }
+  function unitSave(id) {
+    if (unitUpState) return merr('Tunggu proses upload gambar selesai terlebih dahulu.');
+    const v = k => $(k).value.trim(), n = v('u-n'), plat = v('u-plat').toUpperCase(), y = +v('u-y'), cc = +v('u-cc'), r = ['u-r1', 'u-r2', 'u-r3', 'u-r4'].map(k => +v(k));
+    if (!n || !plat) return merr('Model dan plat nomor wajib diisi.');
+    if (!(y >= 1990 && y <= today.getFullYear() + 1) || !(cc > 0)) return merr('Tahun atau kapasitas mesin (cc) tidak valid.');
+    if (r.some(x => !(x > 0))) return merr('Semua tarif harus diisi dengan angka lebih dari 0.');
+    if (FLEET.some(u => u.plat === plat && u.id !== id)) return merr('Plat nomor sudah terdaftar di unit lain.');
+    RATES[n] = [[r[0], r[1]], [r[2], r[3]]];
+    const data = { n, plat, y, cc, servis: $('u-servis').checked, img: unitDraftImg };
+    if (id) Object.assign(FLEET.find(u => u.id === id), data); else FLEET.push(Object.assign({ id: 'U' + (++unitSeq) }, data));
+    closeModal(); refresh();
+  }
+  function unitDelAsk(id) {
+    const u = FLEET.find(x => x.id === id);
+    if (ORDERS.some(o => o.id === u.order)) return openModal('Unit belum bisa dihapus', `<p class="text-sm text-neutral-600"><b>${esc(u.n)}</b> (${esc(u.plat)}) masih terkait order <b>${u.order}</b>. Hapus setelah order selesai.</p>`,
+      '<button type="button" data-m-close class="rounded-md bg-blue-600 px-5 py-2.5 text-xs font-medium text-white hover:bg-blue-700">Mengerti</button>');
+    openModal('Hapus unit?', `<p class="text-sm text-neutral-600">Unit <b>${esc(u.n)}</b> (${esc(u.plat)}) akan dihapus dari daftar. Tindakan ini tidak bisa dibatalkan.</p>`, cancelBtn + mb('unitDelOk', 'Ya, hapus', id, 'danger'));
+  }
+
+  // ---------- Report: detail transaksi ----------
+  function trxModal(i) {
+    const t = TRX[i], o = ORDERS.find(x => x.id === t.id), d = trxDate(t), r = (l, v) => row(l, v);
+    const stat = (l, v) => `<div class="rounded-md bg-neutral-100 p-4"><p class="text-xs text-neutral-500">${l}</p><div class="mt-2 text-xl font-semibold tracking-tight">${v}</div></div>`;
+    let ord = '';
+    if (o) {
+      const tot = calc(o).total, got = TRX.filter(x => x.id === o.id && paid(x)).reduce((a, x) => a + x.a, 0);
+      ord = mcard('Rincian order', r('Unit', o.unit) + r('Tanggal sewa', ft(o.s)) + r('Tanggal kembali', ft(o.e)) + r('Durasi', dur(o.s, o.e)) + r('Total biaya', rp(tot)) + r('Total terbayar', rp(got)) + r('Sisa pembayaran', rp(Math.max(0, tot - got))));
+    } else ord = '<p class="rounded-md bg-neutral-50 p-3 text-xs text-neutral-500">Detail order tidak tersedia untuk transaksi lama.</p>';
+    openModal('Detail transaksi', `
+      <div class="flex items-center gap-3">
+        <span class="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-blue-50 text-base font-semibold text-blue-600">${esc(t.n[0])}</span>
+        <div><h4 class="text-lg font-medium leading-tight">${t.k} · ${t.id}</h4><p class="text-xs text-neutral-500">${esc(t.n)} · ${fd(d)} ${d.getFullYear()}</p></div>
+      </div>
+      <div class="mt-5 grid grid-cols-2 gap-3">${stat('Nominal', rp(t.a))}${stat('Status', `<span class="inline-block rounded-md px-2 py-0.5 text-xs font-medium ${TLBL[t.s]}">${t.s}</span>`)}</div>
+      <div class="mt-3 space-y-3">${mcard('Rincian transaksi', r('Tanggal', `${fd(d)} ${d.getFullYear()}`) + r('Order', t.id) + r('Penyewa', t.n) + r('Keterangan', t.k))}${ord}</div>`,
+      '<button type="button" data-m-close class="rounded-md bg-neutral-100 px-5 py-2.5 text-xs font-medium hover:bg-neutral-200">Tutup</button>' + (o ? `<button type="button" data-order="${o.id}" class="rounded-md bg-blue-600 px-5 py-2.5 text-xs font-medium text-white hover:bg-blue-700">Lihat order</button>` : ''), 'max-w-2xl');
+  }
+
+  // ---------- Report: export PDF / Excel ----------
+  const stamp = () => `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+  const trxTable = () => TRX.slice().sort((a, b) => b.d - a.d).map(t => { const d = trxDate(t); return [`${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`, t.id, t.n, t.k, t.a, t.s]; });
+  const TRX_HEAD = ['Tanggal', 'Order', 'Penyewa', 'Keterangan', 'Nominal', 'Status'];
+  function exportPdf() {
+    if (!window.jspdf) return info('Export PDF gagal', 'Library PDF belum termuat. Periksa koneksi internet lalu coba lagi.');
+    const doc = new window.jspdf.jsPDF(), hs = { fillColor: [37, 99, 235] };
+    doc.setFontSize(14); doc.text('Report Traverent Bandung', 14, 16);
+    doc.setFontSize(9); doc.text(`Dibuat ${fd(today)} ${today.getFullYear()}`, 14, 22);
+    doc.autoTable({ startY: 28, head: [['Ringkasan', 'Nominal']], body: finSum().map(s => [s[0], rp(s[1])]), theme: 'grid', headStyles: hs, styles: { fontSize: 9 } });
+    doc.setFontSize(11); doc.text('Transaksi terbaru', 14, doc.lastAutoTable.finalY + 10);
+    doc.autoTable({ startY: doc.lastAutoTable.finalY + 14, head: [TRX_HEAD], body: trxTable().map(r => [r[0], r[1], r[2], r[3], rp(r[4]), r[5]]), theme: 'grid', headStyles: hs, styles: { fontSize: 9 } });
+    doc.save(`report-traverent-${stamp()}.pdf`);
+  }
+  function exportXls() {
+    if (!window.XLSX) return info('Export Excel gagal', 'Library spreadsheet belum termuat. Periksa koneksi internet lalu coba lagi.');
+    const wb = XLSX.utils.book_new(), s1 = XLSX.utils.aoa_to_sheet([['Ringkasan', 'Nominal (Rp)']].concat(finSum())), s2 = XLSX.utils.aoa_to_sheet([TRX_HEAD].concat(trxTable()));
+    s1['!cols'] = [{ wch: 26 }, { wch: 16 }]; s2['!cols'] = [{ wch: 18 }, { wch: 12 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 22 }];
+    XLSX.utils.book_append_sheet(wb, s1, 'Ringkasan'); XLSX.utils.book_append_sheet(wb, s2, 'Transaksi');
+    XLSX.writeFile(wb, `report-traverent-${stamp()}.xlsx`);
+  }
+
+  // ---------- Router aksi modal / tombol baru ----------
+  function doAct(k, id) {
+    ({
+      crewAdd, crewInvite, crewEdit: () => crewForm(id), crewSave: () => crewSave(id), crewDel: () => crewDelAsk(id),
+      crewDelOk: () => { CREW.splice(CREW.findIndex(c => c.id === id), 1); closeModal(); refresh(); },
+      unitAdd: () => unitForm(), unitEdit: () => unitForm(id), unitSave: () => unitSave(id), unitDel: () => unitDelAsk(id),
+      unitDelOk: () => { FLEET.splice(FLEET.findIndex(u => u.id === id), 1); closeModal(); refresh(); },
+      acctToggle: () => { const m = $('acct-menu'); m.classList.toggle('hidden'); document.querySelector('[data-do=acctToggle]').setAttribute('aria-expanded', !m.classList.contains('hidden')); },
+      logoutAsk: () => { $('acct-menu').classList.add('hidden'); openModal('Keluar dari akun?', '<p class="text-sm text-neutral-600">Kamu akan keluar dari akun <b>Admin Traverent</b> dan perlu login lagi untuk membuka halaman admin.</p>', cancelBtn + mb('logoutOk', 'Ya, keluar', '', 'danger')); },
+      logoutOk: () => { try { localStorage.removeItem(ADMIN_AUTH_KEY); } catch (_) {} location.href = LOGIN_URL; },
+      expToggle: () => $('exp-menu').classList.toggle('hidden'),
+      expPdf: () => { $('exp-menu').classList.add('hidden'); exportPdf(); },
+      expXls: () => { $('exp-menu').classList.add('hidden'); exportXls(); }
+    })[k]();
+  }
+
+  // ---------- Sinkronisasi state demo dengan localStorage ----------
+  function hydrateFromStore() {
+    if (!window.TraverentDemo) return;
+    const st = window.TraverentDemo.load();
+    CREW.length = 0;
+    (st.CREW || []).forEach(c => CREW.push(Object.assign({}, c)));
+    crewSeq = st.crewSeq || CREW.length;
+
+    ORDERS.length = 0;
+    (st.ORDERS || []).forEach(o => {
+      ORDERS.push(Object.assign({}, o, { s: new Date(o.s), e: new Date(o.e) }));
+    });
+
+    TRX.length = 0;
+    (st.TRX || []).forEach(t => TRX.push(Object.assign({}, t)));
+
+    FLEET.length = 0;
+    (st.FLEET || []).forEach(u => FLEET.push(Object.assign({}, u)));
+    unitSeq = st.unitSeq || FLEET.length;
+
+    if (st.RATES) Object.assign(RATES, st.RATES);
+    if (!ORDERS.some(o => o.id === sel) && ORDERS.length) sel = ORDERS[0].id;
+  }
+
+  function syncStore() {
+    if (!window.TraverentDemo) return;
+    const st = window.TraverentDemo.load();
+    st.CREW = CREW.map(c => Object.assign({}, c));
+    st.crewSeq = crewSeq;
+    st.ORDERS = ORDERS.map(o => Object.assign({}, o, { s: o.s instanceof Date ? o.s.toISOString() : o.s, e: o.e instanceof Date ? o.e.toISOString() : o.e }));
+    st.TRX = TRX.map(t => Object.assign({}, t));
+    st.FLEET = FLEET.map(u => Object.assign({}, u));
+    st.unitSeq = unitSeq;
+    st.RATES = Object.assign({}, RATES);
+    window.TraverentDemo.save(st);
+  }
+
+  // ---------- Event ----------
+  function refresh() { syncStore(); renderNav(); renderStats(); renderList(); renderDetail(); renderCrew(); renderFinance(); renderUnits(); renderCal(); }
+  document.addEventListener('click', e => {
+    const s = e.target.closest('[data-sel]'), t = e.target.closest('[data-tab]'), a = e.target.closest('[data-act]'), im = e.target.closest('[data-img]');
+    if (s) { sel = s.dataset.sel; tab = 'detail'; renderList(); renderDetail(); if (innerWidth < 1024) $('detail').scrollIntoView({ behavior: 'smooth' }); }
+    if (t) { tab = t.dataset.tab; renderDetail(); }
+    if (a) act(a.dataset.act);
+    if (im) openLb(im);
+    const cal = e.target.closest('[data-cal]'), ufb = e.target.closest('[data-uf]'), ofb = e.target.closest('[data-of]'), cfb = e.target.closest('[data-cf]'), od = e.target.closest('[data-order]');
+    if (cal) { const v = +cal.dataset.cal; cm = v ? new Date(cm.getFullYear(), cm.getMonth() + v, 1) : new Date(today.getFullYear(), today.getMonth(), 1); renderCal(); }
+    if (ufb) { uf = ufb.dataset.uf; renderUnits(); }
+    if (ofb) { of = ofb.dataset.of; renderList(); }
+    if (cfb) { cf = cfb.dataset.cf; renderCal(); }
+    if (od) { closeModal(); sel = od.dataset.order; tab = 'detail'; if (location.hash !== '#dashboard') location.hash = 'dashboard'; refresh(); }
+    if (e.target.closest('[data-u-pick]')) { const fi = $('u-file'); if (fi) fi.click(); }
+    if (e.target.closest('[data-u-clear]')) { clearUnitUpload(); unitDraftImg = ''; renderUnitImgField(); }
+    const dd = e.target.closest('[data-do]'), tr = e.target.closest('[data-trx]');
+    if (dd) doAct(dd.dataset.do, dd.dataset.id);
+    if (tr) trxModal(+tr.dataset.trx);
+    if (!e.target.closest('#exp-wrap')) $('exp-menu').classList.add('hidden');
+    if (!e.target.closest('#acct-wrap')) $('acct-menu').classList.add('hidden');
+    if (e.target === $('modal') || e.target.closest('[data-m-close]')) closeModal();
+  });
+  document.addEventListener('change', e => {
+    if (e.target.id === 'u-file') {
+      handleUnitFileSelect(e.target.files[0]);
+      e.target.value = '';
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Enter' && e.target.closest('#m-body input:not([type=checkbox]):not([type=file])')) { const p = $('m-foot').querySelector('[data-primary]'); if (p) p.click(); }
+    if (e.key === 'Enter' && e.target.matches('[data-trx]')) trxModal(+e.target.dataset.trx);
+  });
+  document.addEventListener('input', e => {   // pilih model yang sudah ada -> isi tarif otomatis
+    if (e.target.id === 'u-n' && RATES[e.target.value]) { const r = RATES[e.target.value]; ['u-r1', 'u-r2', 'u-r3', 'u-r4'].forEach((k, i) => $(k).value = r[i >> 1][i & 1]); }
+  });
+  $('q').oninput = renderList;
+
+  hydrateFromStore();
+  $('today').textContent = `${fd(today)} ${today.getFullYear()}`;
+  syncReturn(); refresh(); show();
+  window.addEventListener('storage', e => { if (e.key === (window.TraverentDemo && window.TraverentDemo.STORE_KEY)) { hydrateFromStore(); syncReturn(); renderNav(); renderStats(); renderList(); renderDetail(); renderCrew(); renderFinance(); renderUnits(); renderCal(); } });
+  setInterval(() => { if (syncReturn()) refresh(); }, 60000);
+</script>
+</body>
+</html>

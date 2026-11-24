@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Form Pemesanan | Traverent Bandung</title>
+<link rel="icon" type="image/png" href="image/favico.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } }
+</script>
+<style type="text/tailwindcss">
+  html { scroll-behavior: smooth; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+  .field { @apply w-full rounded border border-neutral-200 bg-white px-3 py-2.5 text-xs outline-none placeholder:text-neutral-400 focus:border-neutral-400; }
+  .field.bad { @apply border-red-500; }
+  .ring-prog { transition: stroke-dashoffset .5s ease; }
+  @keyframes pop { 0% { opacity: 0; transform: scale(.6); } 100% { opacity: 1; transform: scale(1); } }
+  .pop-in { animation: pop .45s cubic-bezier(.2,.9,.3,1.2) both; }
+  @keyframes diaSweep {
+    0% { background-position: 100% 0; opacity: 0.25; transform: translateY(8px); }
+    15% { opacity: 1; }
+    100% { background-position: 0% 0; opacity: 1; transform: translateY(0); }
+  }
+  .dia-reveal { opacity: 0; }
+  .dia-reveal.is-visible {
+    opacity: 1;
+    background-image: linear-gradient(90deg, var(--dia-end, #171717) 0%, var(--dia-end, #171717) 35%, #2563eb 52%, #60a5fa 66%, transparent 82%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: diaSweep 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .dia-reveal.dia-done {
+    background-image: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    color: revert-layer;
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+  #pop {
+    transform-origin: top center;
+    transition: opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1), transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #pop.pop-closed {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+    pointer-events: none;
+  }
+  #pop.pop-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .wheel-item {
+    transition: opacity 0.14s ease-out, transform 0.14s ease-out;
+    will-change: opacity, transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dia-reveal, .reveal { opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important; }
+  }
+</style>
+<!--
+  Radius rule: only `rounded` (4px) and `rounded-md` (6px).
+  Outer containers = rounded-md, inner elements = rounded. Tidak ada rounded-full.
+
+  Data bisa dikirim dari homepage lewat URL, contoh:
+  form-pemesanan.html?unit=Honda%20Vario%20125&start=2026-11-27&end=2026-11-30&t1=09:00&t2=17:00
+  Kalau tidak ada parameter, dipakai data contoh.
+-->
+</head>
+<body class="bg-neutral-100 font-sans text-neutral-900 antialiased">
+
+<main id="app" class="mx-auto grid max-w-7xl gap-4 px-4 py-6 lg:grid-cols-[260px_minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="rounded-md bg-white p-5 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-3 lg:row-start-1 lg:self-start">
+    <a href="index.html" class="inline-flex h-8 items-center justify-start">
+      <img src="image/logo-navbar.png" alt="Traverent Bandung" class="h-full w-auto object-contain object-left">
+    </a>
+    <h1 data-i18n="sidebar_title" class="dia-reveal mt-8 text-2xl font-medium leading-tight tracking-tight">Isi formulir untuk melanjutkan sewa</h1>
+    <ol id="stepper" class="mt-6 space-y-1"></ol>
+  </aside>
+
+  <!-- ===== Tombol kembali ke landing page & language switcher ===== -->
+  <div class="flex items-center justify-between gap-2 lg:col-start-2 lg:row-start-1">
+    <a href="index.html" class="inline-flex items-center gap-2 rounded bg-white px-3.5 py-2 text-xs font-medium hover:bg-neutral-900 hover:text-white">
+      <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span data-i18n="back_home">Kembali ke Beranda</span>
+    </a>
+    <div class="flex items-center rounded border border-neutral-200 bg-white p-0.5 text-[11px] font-medium text-neutral-600">
+      <button type="button" id="lang-id" class="rounded px-2.5 py-1 transition-colors bg-neutral-900 font-semibold text-white">ID</button>
+      <button type="button" id="lang-en" class="rounded px-2.5 py-1 transition-colors text-neutral-500 hover:text-neutral-900">EN</button>
+    </div>
+  </div>
+
+  <!-- ===== Unit (selalu tampil) ===== -->
+  <div class="flex gap-3 rounded-md bg-white p-3 lg:col-start-2 lg:row-start-2 lg:self-stretch">
+    <!-- MOTOR IMAGE -->
+    <div class="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded bg-neutral-100 p-2 text-xs text-neutral-400">
+      <img id="unitImg" src="image/honda-new-beat-110cc.png" alt="Unit Motor" class="h-full w-full object-contain">
+    </div>
+    <div class="flex min-w-0 flex-1 flex-col">
+      <h3 id="unitName" class="truncate text-sm font-semibold"></h3>
+      <div id="unitTags" class="mt-2 flex flex-wrap gap-1.5"></div>
+      <button type="button" id="btnUnit" data-i18n="btn_change" class="mt-auto w-fit rounded bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700">Ubah</button>
+    </div>
+  </div>
+
+  <!-- ===== Jadwal (selalu tampil) ===== -->
+  <div class="rounded-md bg-white p-2 lg:col-start-3 lg:row-start-2 lg:self-stretch">
+    <div id="sched" class="grid gap-2"></div>
+    <p id="schErr" class="hidden px-1 pt-2 text-[11px] text-red-600">Lengkapi tanggal dan waktu sewa terlebih dahulu.</p>
+  </div>
+
+  <!-- ===== Form ===== -->
+  <form id="form" novalidate class="min-w-0 rounded-md bg-white p-5 sm:p-8 lg:col-start-2 lg:row-start-3" onsubmit="return false">
+
+    <!-- STEP 1 -->
+    <div data-step="1" class="space-y-5">
+      <div>
+        <h2 data-i18n="s1_title" class="dia-reveal text-3xl font-medium tracking-tight">Data Diri</h2>
+        <p data-i18n="s1_desc" class="reveal mt-2 text-xs text-neutral-500">Isi data sesuai identitas yang akan digunakan saat sewa.</p>
+      </div>
+      <div>
+        <label for="wa" data-i18n="lbl_wa" class="mb-1.5 block text-[11px] text-neutral-500">Nomor WhatsApp</label>
+        <input id="wa" type="tel" inputmode="tel" placeholder="08xxxxxxxxxx" class="field">
+        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+      </div>
+      <div>
+        <label for="nama" data-i18n="lbl_nama" class="mb-1.5 block text-[11px] text-neutral-500">Nama Lengkap (sesuai KTP)</label>
+        <input id="nama" type="text" data-i18n-ph="ph_nama" placeholder="Nama lengkap" class="field">
+        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+      </div>
+      <div>
+        <label for="email" data-i18n="lbl_email" class="mb-1.5 block text-[11px] text-neutral-500">Email</label>
+        <input id="email" type="email" data-i18n-ph="ph_email" placeholder="nama@email.com" class="field">
+        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div data-step="2" class="hidden space-y-5">
+      <div>
+        <h2 data-i18n="s2_title" class="dia-reveal text-3xl font-medium tracking-tight">Detail Sewa</h2>
+        <p data-i18n="s2_desc" class="reveal mt-2 text-xs text-neutral-500">Lengkapi kontak darurat, identitas, dan rencana perjalanan.</p>
+      </div>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label for="ecName" data-i18n="lbl_ec_name" class="mb-1.5 block text-[11px] text-neutral-500">Nama Kontak Darurat</label>
+          <input id="ecName" type="text" data-i18n-ph="ph_ec_name" placeholder="Nama kontak" class="field">
+          <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+        </div>
+        <div>
+          <label for="ecPhone" data-i18n="lbl_ec_phone" class="mb-1.5 block text-[11px] text-neutral-500">Nomor Kontak Darurat</label>
+          <input id="ecPhone" type="tel" inputmode="tel" placeholder="08xxxxxxxxxx" class="field">
+          <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+        </div>
+      </div>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label for="ig" class="mb-1.5 block text-[11px] text-neutral-500">Instagram</label>
+          <input id="ig" type="text" placeholder="@username" class="field">
+          <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+        </div>
+        <div>
+          <label for="tt" class="mb-1.5 block text-[11px] text-neutral-500">TikTok</label>
+          <input id="tt" type="text" placeholder="@username" class="field">
+          <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+        </div>
+      </div>
+      <div>
+        <span data-i18n="lbl_ktp" class="mb-1.5 block text-[11px] text-neutral-500">Foto KTP</span>
+        <label for="ktp" class="flex cursor-pointer flex-col items-center justify-center rounded border border-dashed border-neutral-300 px-4 py-6 text-center hover:bg-neutral-50">
+          <img id="ktpPreview" alt="Pratinjau KTP" class="mb-3 hidden max-h-40 rounded">
+          <span id="ktpLabel" class="text-xs font-medium">Klik untuk unggah foto KTP</span>
+          <span data-i18n="file_hint" class="mt-1 text-[11px] text-neutral-400">JPG atau PNG, maks. 5 MB</span>
+        </label>
+        <input id="ktp" type="file" accept="image/png,image/jpeg" class="sr-only">
+        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+      </div>
+      <div>
+        <label for="tujuan" data-i18n="lbl_tujuan" class="mb-1.5 block text-[11px] text-neutral-500">Tujuan Sewa</label>
+        <textarea id="tujuan" rows="4" data-i18n-ph="ph_tujuan" placeholder="Ceritakan tujuan dan rencana penggunaan motor" class="field resize-none"></textarea>
+        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+      </div>
+      <div>
+        <label for="area" data-i18n="lbl_area" class="mb-1.5 block text-[11px] text-neutral-500">Area Tujuan</label>
+        <input id="area" type="text" data-i18n-ph="ph_area" placeholder="Contoh: Lembang, Dago, Kota Bandung" class="field">
+        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+      </div>
+      <div>
+        <label for="alamat" data-i18n="lbl_alamat" class="mb-1.5 block text-[11px] text-neutral-500">Alamat Hotel / Tempat Tinggal Selama Sewa</label>
+        <textarea id="alamat" rows="3" data-i18n-ph="ph_alamat" placeholder="Nama hotel atau alamat lengkap" class="field resize-none"></textarea>
+        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+        <p data-i18n="note_ktp" class="mt-2 w-fit rounded bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-900">Penyewaan hanya untuk penyewa dengan KTP di luar Bandung. Alamat ini digunakan untuk keperluan keamanan.</p>
+      </div>
+    </div>
+
+    <!-- STEP 3: REVIEW -->
+    <div data-step="3" class="hidden space-y-5">
+      <div>
+        <h2 data-i18n="s3_title" class="dia-reveal text-3xl font-medium tracking-tight">Review</h2>
+        <p data-i18n="s3_desc" class="reveal mt-2 text-xs text-neutral-500">Pastikan semua data sudah benar sebelum melanjutkan ke pembayaran DP.</p>
+      </div>
+      <div id="review" class="space-y-3"></div>
+      <label class="flex items-start gap-2 text-xs text-neutral-600">
+        <input id="agree" type="checkbox" class="mt-0.5 h-4 w-4 accent-neutral-900">
+        <span data-i18n-html="agree_text">Saya menyatakan data di atas benar dan menyetujui <a href="index.html#faq" class="font-medium underline">Syarat &amp; Ketentuan</a>.</span>
+      </label>
+      <p id="agreeErr" data-i18n="agree_err" class="hidden text-[11px] text-red-600">Centang persetujuan untuk melanjutkan.</p>
+    </div>
+
+    <!-- STEP 4: PEMBAYARAN DP -->
+    <div data-step="4" class="hidden space-y-5">
+      <div>
+        <h2 data-i18n="s4_title" class="dia-reveal text-3xl font-medium tracking-tight">Pembayaran DP</h2>
+        <p data-i18n="s4_desc" class="reveal mt-2 text-xs text-neutral-500">Transfer DP untuk mengamankan unit, lalu unggah bukti transfernya.</p>
+      </div>
+
+      <div class="rounded-md bg-neutral-50 p-4">
+        <p data-i18n="dp_label" class="text-[11px] text-neutral-500">Nominal DP</p>
+        <p id="dpAmount" class="mt-1 text-3xl font-medium tracking-tight"></p>
+        <dl id="bankInfo" class="mt-4 divide-y divide-neutral-200 border-t border-neutral-200"></dl>
+      </div>
+
+      <div>
+        <span data-i18n="lbl_proof" class="mb-1.5 block text-[11px] text-neutral-500">Bukti Transfer DP</span>
+        <label for="proof" class="flex cursor-pointer flex-col items-center justify-center rounded border border-dashed border-neutral-300 px-4 py-6 text-center hover:bg-neutral-50">
+          <img id="proofPreview" alt="Pratinjau bukti transfer" class="mb-3 hidden max-h-56 rounded">
+          <span id="proofLabel" class="text-xs font-medium">Klik untuk unggah bukti transfer</span>
+          <span data-i18n="file_hint" class="mt-1 text-[11px] text-neutral-400">JPG atau PNG, maks. 5 MB</span>
+        </label>
+        <input id="proof" type="file" accept="image/png,image/jpeg" class="sr-only">
+        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
+      </div>
+
+      <p data-i18n="note_dp" class="w-fit rounded bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-900">Pesanan dikonfirmasi admin setelah bukti transfer diverifikasi.</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-10 flex items-center justify-between">
+      <button type="button" id="btnBack" data-i18n="btn_back" class="invisible rounded bg-neutral-100 px-5 py-2.5 text-xs font-medium hover:bg-neutral-200">Kembali</button>
+      <button type="button" id="btnNext" class="inline-flex items-center gap-2 rounded bg-blue-600 px-6 py-2.5 text-xs font-medium text-white hover:bg-blue-700"></button>
+    </div>
+  </form>
+
+  <!-- ===== Kolom kanan bawah: estimasi (step 1-2) / invoice (step 3-4) ===== -->
+  <div id="estimate" class="rounded-md bg-white p-5 lg:col-start-3 lg:row-start-3"></div>
+  <div id="invoicePanel" class="hidden rounded-md bg-white p-3 lg:col-start-3 lg:row-start-3">
+    <div class="flex items-center justify-between px-2 pb-3 pt-1">
+      <h3 class="text-sm font-semibold">Invoice</h3>
+      <span data-i18n="inv_auto" class="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-900">Total dihitung otomatis</span>
+    </div>
+    <div class="rounded-md bg-neutral-50 p-3 sm:p-5"><div id="invoice" class="rounded bg-white p-4 sm:p-5"></div></div>
+  </div>
+</main>
+
+<!-- ================= SUCCESS SCREEN ================= -->
+<section id="success" class="hidden min-h-screen bg-white px-4">
+  <div class="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center py-16 text-center">
+    <div id="seal" class="pop-in"></div>
+    <h1 data-i18n="ok_title" class="mt-8 text-4xl font-medium tracking-tight">Pesanan Terkirim</h1>
+    <p data-i18n="ok_desc" class="mt-3 max-w-xs text-sm leading-relaxed text-neutral-500">Kami akan segera menghubungi Anda untuk konfirmasi lebih lanjut.</p>
+    <dl id="okRows" class="mt-10 w-full divide-y divide-neutral-200 rounded-md bg-neutral-50 px-4 py-1 text-left"></dl>
+    <a href="index.html" class="mt-10 inline-flex items-center gap-3 text-sm font-medium hover:underline">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span data-i18n="back_home">Kembali ke Beranda</span>
+    </a>
+  </div>
+</section>
+
+<!-- ================= Dialog ubah unit ================= -->
+<dialog id="dlgUnit" class="w-[calc(100%-2rem)] max-w-md rounded-md p-0 backdrop:bg-neutral-900/40">
+  <div class="p-6">
+    <h3 data-i18n-html="dlg_title" class="text-2xl font-medium leading-tight tracking-tight">Pilih unit motor<br>untuk sewa Anda</h3>
+    <p data-i18n="dlg_desc" class="mt-5 text-xs text-neutral-500">Estimasi total mengikuti tanggal dan waktu sewa yang dipilih.</p>
+    <div id="unitList" class="mt-3 max-h-[50vh] space-y-3 overflow-y-auto p-1"></div>
+    <div class="mt-5 flex items-center gap-4">
+      <button type="button" id="saveUnit" class="inline-flex items-center gap-2 rounded bg-blue-600 px-5 py-2.5 text-xs font-medium text-white hover:bg-blue-700"><span data-i18n="btn_save">Simpan</span> <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button type="button" id="cancelUnit" data-i18n="btn_cancel" class="text-xs font-medium text-neutral-500 hover:text-neutral-900">Batal</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="pop" class="pop-closed absolute z-50 hidden rounded-md border border-neutral-200 bg-white p-4 shadow-lg"></div>
+
+<script src="demo-store.js"></script>
+<script>
+  const $ = id => document.getElementById(id), pad = n => String(n).padStart(2, '0');
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const rp = n => 'Rp ' + n.toLocaleString('id-ID');
+  const arrow = '<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  const check = '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l5 5 9-9"/></svg>';
+
+  // ---------- Data unit & tarif (samakan dengan homepage) ----------
+  // wd = weekday [12 jam, 24 jam], we = weekend [12 jam, 24 jam], ex = [weekday extra, weekend extra]
+  const UNITS = [
+    { n: 'Honda New Beat', y: '2022–2026', t: 'Matic', cc: 110, wd: [85000, 95000], we: [105000, 120000], ex: [10000, 15000], img: 'image/honda-new-beat-110cc.png' },
+    { n: 'Honda New Vario', y: '2022–2026', t: 'Matic', cc: 125, wd: [105000, 115000], we: [130000, 145000], ex: [15000, 20000], img: 'image/honda-new-vario-125cc.png' },
+    { n: 'Yamaha New Gear', y: '2022–2026', t: 'Matic', cc: 125, wd: [95000, 105000], we: [115000, 130000], ex: [10000, 15000], img: 'image/yamaha-new-gear-125cc.png' }
+  ];
+  try {
+    const store = window.TraverentDemo && window.TraverentDemo.load();
+    if (store && store.RATES) {
+      UNITS.forEach(u => {
+        if (store.RATES[u.n]) {
+          u.wd = store.RATES[u.n][0];
+          u.we = store.RATES[u.n][1];
+          if (store.RATES[u.n][2]) u.ex = store.RATES[u.n][2];
+        }
+      });
+    }
+  } catch (_) {}
+  const EXTRA_MAX = 3;        // maksimal jam tambahan sebelum kena tarif 12 jam
+  const DP = 50000;           // nominal DP
+  // GANTI dengan data rekening Traverent yang sebenarnya
+  const BANK = { 'Bank': 'Nama Bank', 'Nomor rekening': 'Nomor rekening', 'Atas nama': 'Atas nama' };
+  // Tanggal merah: 'MM-DD' (berulang tiap tahun) atau 'YYYY-MM-DD'. Lengkapi hari libur nasional yang berubah tiap tahun.
+  const HOLIDAYS = ['01-01', '05-01', '06-01', '08-17', '12-25'];
+  const chip = t => `<span class="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-900">${esc(t)}</span>`;
+
+  // ---------- i18n ----------
+  let curLang = localStorage.getItem('traverent_lang') || 'id';
+  const I18N = {
+    id: {
+      page_title: 'Form Pemesanan | Traverent Bandung',
+      sidebar_title: 'Isi formulir untuk melanjutkan sewa',
+      back_home: 'Kembali ke Beranda',
+      btn_change: 'Ubah',
+      s1_title: 'Data Diri', s1_desc: 'Isi data sesuai identitas yang akan digunakan saat sewa.',
+      lbl_wa: 'Nomor WhatsApp', lbl_nama: 'Nama Lengkap (sesuai KTP)', ph_nama: 'Nama lengkap', lbl_email: 'Email', ph_email: 'nama@email.com',
+      s2_title: 'Detail Sewa', s2_desc: 'Lengkapi kontak darurat, identitas, dan rencana perjalanan.',
+      lbl_ec_name: 'Nama Kontak Darurat', ph_ec_name: 'Nama kontak', lbl_ec_phone: 'Nomor Kontak Darurat',
+      lbl_ktp: 'Foto KTP', ktp_upload: 'Klik untuk unggah foto KTP', file_hint: 'JPG atau PNG, maks. 5 MB',
+      lbl_tujuan: 'Tujuan Sewa', ph_tujuan: 'Ceritakan tujuan dan rencana penggunaan motor',
+      lbl_area: 'Area Tujuan', ph_area: 'Contoh: Lembang, Dago, Kota Bandung',
+      lbl_alamat: 'Alamat Hotel / Tempat Tinggal Selama Sewa', ph_alamat: 'Nama hotel atau alamat lengkap',
+      note_ktp: 'Penyewaan hanya untuk penyewa dengan KTP di luar Bandung. Alamat ini digunakan untuk keperluan keamanan.',
+      s3_title: 'Review', s3_desc: 'Pastikan semua data sudah benar sebelum melanjutkan ke pembayaran DP.',
+      agree_text: 'Saya menyatakan data di atas benar dan menyetujui <a href="index.html#faq" class="font-medium underline">Syarat &amp; Ketentuan</a>.',
+      agree_err: 'Centang persetujuan untuk melanjutkan.',
+      s4_title: 'Pembayaran DP', s4_desc: 'Transfer DP untuk mengamankan unit, lalu unggah bukti transfernya.',
+      dp_label: 'Nominal DP', lbl_proof: 'Bukti Transfer DP', proof_upload: 'Klik untuk unggah bukti transfer',
+      note_dp: 'Pesanan dikonfirmasi admin setelah bukti transfer diverifikasi.',
+      btn_back: 'Kembali', btn_next: 'Lanjut ', btn_to_pay: 'Lanjut ke Pembayaran ', btn_submit: 'Kirim Pesanan ',
+      inv_auto: 'Total dihitung otomatis',
+      ok_title: 'Pesanan Terkirim', ok_desc: 'Kami akan segera menghubungi Anda untuk konfirmasi lebih lanjut.',
+      dlg_title: 'Pilih unit motor<br>untuk sewa Anda', dlg_desc: 'Estimasi total mengikuti tanggal dan waktu sewa yang dipilih.',
+      btn_save: 'Simpan', btn_cancel: 'Batal',
+      steps: ['Data Diri', 'Detail Sewa', 'Review', 'Pembayaran DP'],
+      lbl_start: 'Tanggal Sewa', lbl_end: 'Tanggal Kembali', lbl_t1: 'Waktu Sewa', lbl_t2: 'Waktu Kembali',
+      ph_date: 'Pilih tanggal', ph_time: 'Pilih waktu',
+      pick_date_title: 'Pilih Tanggal Sewa', pick_date_btn: 'Pilih Tanggal',
+      pick_t1_title: 'Pilih Waktu Sewa', pick_t2_title: 'Pilih Waktu Kembali', pick_time_quick: 'Pilihan cepat', pick_time_btn: 'Pilih Waktu',
+      year_prefix: 'Tahun ', day_unit: 'hari', hr_unit: 'jam',
+      rent_hrs: (h, we) => `Sewa ${h} jam (${we ? 'Weekend' : 'Weekday'})`,
+      extra_hrs: we => `Extra hours (${we ? 'Weekend' : 'Weekday'})`,
+      est_title: 'Estimasi biaya',
+      est_note: dp => `Dihitung otomatis dari unit, tanggal, dan waktu sewa. Rincian lengkap ada di langkah Review. DP ${dp} dibayar di langkah terakhir.`,
+      err_invalid_time: 'Waktu kembali harus setelah waktu sewa.',
+      err_incomplete_sch: 'Lengkapi tanggal dan waktu sewa terlebih dahulu.',
+      est_empty: 'Pilih tanggal dan waktu sewa.',
+      dlg_est: 'estimasi', dlg_pick_sch: 'Pilih jadwal untuk<br>melihat estimasi',
+      dlg_12h: '12 jam', dlg_24h: '24 jam', dlg_wd: 'Weekday (Sen–Kam)', dlg_we: 'Weekend (Jum–Min / tgl merah)', dlg_ex: 'Extra hours (Weekday / Weekend)', per_hr: '/jam',
+      err_wa: 'Masukkan nomor WhatsApp yang valid.', err_nama: 'Nama lengkap wajib diisi.', err_email: 'Masukkan email yang valid.',
+      err_ec_name: 'Nama kontak darurat wajib diisi.', err_ec_phone: 'Masukkan nomor yang valid.',
+      err_ig: 'Username Instagram wajib diisi.', err_tt: 'Username TikTok wajib diisi.',
+      err_tujuan: 'Jelaskan tujuan sewa (min. 10 karakter).', err_area: 'Area tujuan wajib diisi.', err_alamat: 'Alamat hotel / tempat tinggal wajib diisi.',
+      err_ktp: 'Foto KTP wajib diunggah.', err_proof: 'Bukti transfer DP wajib diunggah.',
+      err_file_type: 'Format file harus JPG atau PNG.', err_file_size: 'Ukuran file maksimal 5 MB.',
+      rev_unit_sch: 'Unit & Jadwal', rev_unit: 'Unit', rev_start: 'Tanggal sewa', rev_end: 'Tanggal kembali', rev_dur: 'Durasi',
+      rev_ec: 'Kontak darurat', rev_purpose: 'Tujuan sewa', rev_area: 'Area tujuan', rev_addr: 'Alamat hotel / tinggal',
+      bank_labels: { 'Bank': 'Bank', 'Nomor rekening': 'Nomor rekening', 'Atas nama': 'Atas nama' },
+      inv_empty: 'Lengkapi tanggal dan waktu sewa untuk melihat rincian biaya.',
+      inv_issued: 'Tanggal Terbit', inv_start: 'Tanggal Sewa', inv_end: 'Tanggal Kembali', inv_at: 'Pukul ',
+      inv_billed_by: 'Billed by', inv_billed_to: 'Billed to', inv_price: 'Harga', inv_amt: 'Jumlah',
+      inv_dp: 'DP (transfer)', inv_rem: 'Sisa pembayaran',
+      inv_notes: (max, r1, r2) => `Tarif dihitung otomatis berdasarkan unit, tanggal, dan waktu sewa (dibulatkan per jam). Keterlambatan maksimal ${max} jam dikenakan ${r1}–${r2}/jam, lebih dari itu berlaku tarif normal 12 jam. Total final dikonfirmasi admin.`,
+      ok_order_id: 'Order ID', ok_unit: 'Unit', ok_period: 'Periode sewa', ok_method: 'Metode pembayaran', ok_method_val: 'Transfer Bank (DP)',
+      ok_datetime: 'Tanggal & waktu', ok_dp: 'DP dibayar', ok_total: 'Total sewa'
+    },
+    en: {
+      page_title: 'Booking Form | Traverent Bandung',
+      sidebar_title: 'Fill out the form to continue your rental',
+      back_home: 'Back to Home',
+      btn_change: 'Change',
+      s1_title: 'Personal Info', s1_desc: 'Enter your details matching the ID card used for the rental.',
+      lbl_wa: 'WhatsApp Number', lbl_nama: 'Full Name (as per ID/Passport)', ph_nama: 'Full name', lbl_email: 'Email', ph_email: 'name@email.com',
+      s2_title: 'Rental Details', s2_desc: 'Complete emergency contact, ID photo, and trip plan.',
+      lbl_ec_name: 'Emergency Contact Name', ph_ec_name: 'Contact name', lbl_ec_phone: 'Emergency Contact Number',
+      lbl_ktp: 'ID Card (KTP / Passport) Photo', ktp_upload: 'Click to upload ID card photo', file_hint: 'JPG or PNG, max. 5 MB',
+      lbl_tujuan: 'Rental Purpose', ph_tujuan: 'Describe your trip purpose and motorbike usage plan',
+      lbl_area: 'Destination Area', ph_area: 'e.g. Lembang, Dago, Bandung City',
+      lbl_alamat: 'Hotel / Accommodation Address During Rental', ph_alamat: 'Hotel name or full address',
+      note_ktp: 'Rentals are for visitors from outside Bandung. This address is used for security verification.',
+      s3_title: 'Review', s3_desc: 'Make sure all details are correct before proceeding to DP payment.',
+      agree_text: 'I confirm that the above details are accurate and agree to the <a href="index.html#faq" class="font-medium underline">Terms &amp; Conditions</a>.',
+      agree_err: 'Please check the agreement box to continue.',
+      s4_title: 'DP Payment', s4_desc: 'Transfer the down payment to secure your unit, then upload the transfer receipt.',
+      dp_label: 'Down Payment (DP) Amount', lbl_proof: 'DP Transfer Receipt', proof_upload: 'Click to upload transfer receipt',
+      note_dp: 'Your booking will be confirmed by our admin after the transfer receipt is verified.',
+      btn_back: 'Back', btn_next: 'Next ', btn_to_pay: 'Proceed to Payment ', btn_submit: 'Submit Order ',
+      inv_auto: 'Auto-calculated total',
+      ok_title: 'Order Submitted', ok_desc: 'We will contact you shortly for further confirmation.',
+      dlg_title: 'Choose a motorbike<br>for your rental', dlg_desc: 'Estimated total follows your selected rental dates and times.',
+      btn_save: 'Save', btn_cancel: 'Cancel',
+      steps: ['Personal Info', 'Rental Details', 'Review', 'DP Payment'],
+      lbl_start: 'Rental Date', lbl_end: 'Return Date', lbl_t1: 'Pickup Time', lbl_t2: 'Return Time',
+      ph_date: 'Select date', ph_time: 'Select time',
+      pick_date_title: 'Select Rental Date', pick_date_btn: 'Select Date',
+      pick_t1_title: 'Select Pickup Time', pick_t2_title: 'Select Return Time', pick_time_quick: 'Quick select', pick_time_btn: 'Select Time',
+      year_prefix: 'Year ', day_unit: 'days', hr_unit: 'hrs',
+      rent_hrs: (h, we) => `${h}-hr rental (${we ? 'Weekend' : 'Weekday'})`,
+      extra_hrs: we => `Extra hours (${we ? 'Weekend' : 'Weekday'})`,
+      est_title: 'Estimated cost',
+      est_note: dp => `Automatically calculated from unit, dates, and rental times. Full breakdown is on the Review step. ${dp} DP is paid at the final step.`,
+      err_invalid_time: 'Return time must be after pickup time.',
+      err_incomplete_sch: 'Please complete rental dates and times first.',
+      est_empty: 'Select rental dates and times.',
+      dlg_est: 'estimated', dlg_pick_sch: 'Select schedule to<br>view estimate',
+      dlg_12h: '12 hrs', dlg_24h: '24 hrs', dlg_wd: 'Weekday (Mon–Thu)', dlg_we: 'Weekend (Fri–Sun / Holidays)', dlg_ex: 'Extra hours (Weekday / Weekend)', per_hr: '/hr',
+      err_wa: 'Please enter a valid WhatsApp number.', err_nama: 'Full name is required.', err_email: 'Please enter a valid email.',
+      err_ec_name: 'Emergency contact name is required.', err_ec_phone: 'Please enter a valid phone number.',
+      err_ig: 'Instagram username is required.', err_tt: 'TikTok username is required.',
+      err_tujuan: 'Please describe your rental purpose (min. 10 chars).', err_area: 'Destination area is required.', err_alamat: 'Hotel / accommodation address is required.',
+      err_ktp: 'ID card photo is required.', err_proof: 'DP transfer receipt is required.',
+      err_file_type: 'File format must be JPG or PNG.', err_file_size: 'Maximum file size is 5 MB.',
+      rev_unit_sch: 'Unit & Schedule', rev_unit: 'Unit', rev_start: 'Rental date', rev_end: 'Return date', rev_dur: 'Duration',
+      rev_ec: 'Emergency contact', rev_purpose: 'Rental purpose', rev_area: 'Destination area', rev_addr: 'Hotel / address',
+      bank_labels: { 'Bank': 'Bank', 'Nomor rekening': 'Account number', 'Atas nama': 'Account holder' },
+      inv_empty: 'Complete rental dates and times to view cost breakdown.',
+      inv_issued: 'Issue Date', inv_start: 'Rental Date', inv_end: 'Return Date', inv_at: 'at ',
+      inv_billed_by: 'Billed by', inv_billed_to: 'Billed to', inv_price: 'Price', inv_amt: 'Amount',
+      inv_dp: 'DP (transfer)', inv_rem: 'Remaining balance',
+      inv_notes: (max, r1, r2) => `Rates are automatically calculated based on unit, dates, and rental times (rounded per hour). Up to ${max} extra hours are charged ${r1}–${r2}/hr; beyond that, standard 12-hour rate applies. Final total is confirmed by admin.`,
+      ok_order_id: 'Order ID', ok_unit: 'Unit', ok_period: 'Rental period', ok_method: 'Payment method', ok_method_val: 'Bank Transfer (DP)',
+      ok_datetime: 'Date & time', ok_dp: 'DP paid', ok_total: 'Total rental'
+    }
+  };
+  const T_TXT = () => I18N[curLang] || I18N.id;
+
+  // ---------- State ----------
+  const HARI_DATA = {
+    id: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+    en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  };
+  const BULAN_DATA = {
+    id: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+    en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  };
+  const DAYS_SHORT = { id: ['S', 'S', 'R', 'K', 'J', 'S', 'M'], en: ['M', 'T', 'W', 'T', 'F', 'S', 'S'] };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const addDays = n => new Date(today.getFullYear(), today.getMonth(), today.getDate() + n);
+  const parseD = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.test(s || '') && s.split('-'); return m ? new Date(+m[0], m[1] - 1, +m[2]) : null; };
+  const fmt = d => { const H = HARI_DATA[curLang] || HARI_DATA.id, B = BULAN_DATA[curLang] || BULAN_DATA.id; return `${H[d.getDay()]}, ${d.getDate()} ${B[d.getMonth()]}`; };
+  const fmtFull = d => { const B = BULAN_DATA[curLang] || BULAN_DATA.id; return `${d.getDate()} ${B[d.getMonth()]} ${d.getFullYear()}`; };
+  const same = (a, b) => a && b && a.getTime() === b.getTime();
+
+  const qs = new URLSearchParams(location.search);
+  const ui = UNITS.findIndex(u => u.n.toLowerCase() === (qs.get('unit') || '').toLowerCase());
+  const S = {
+    start: parseD(qs.get('start')) || addDays(3),     // data contoh jika tanpa parameter
+    end: parseD(qs.get('end')) || addDays(6),
+    t1: /^\d{2}:\d{2}$/.test(qs.get('t1')) ? qs.get('t1') : '09:00',
+    t2: /^\d{2}:\d{2}$/.test(qs.get('t2')) ? qs.get('t2') : '17:00'
+  };
+  let unit = ui >= 0 ? ui : 0, step = 1;
+
+  // ---------- Kalkulasi biaya otomatis ----------
+  const withTime = (d, t) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), +t.slice(0, 2), +t.slice(3));
+  const isRedDay = d => {
+    const ymd = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    return HOLIDAYS.includes(ymd) || HOLIDAYS.includes(ymd.slice(5));
+  };
+  const isWeekend = d => [0, 5, 6].includes(d.getDay()) || isRedDay(d);   // Jumat–Minggu / tanggal merah
+
+  function calc(ui = unit) {
+    if (!(S.start && S.end && S.t1 && S.t2)) return { state: 'empty' };
+    const a = withTime(S.start, S.t1), b = withTime(S.end, S.t2);
+    if (b <= a) return { state: 'invalid' };
+    const t = T_TXT();
+    const hours = Math.ceil((b - a) / 36e5 - 1e-9);            // dibulatkan ke atas per jam
+    const u = UNITS[ui], map = new Map();
+    const add = (key, label, qty, price, isExtra = false) => {
+      const l = map.get(key) || { label, qty: 0, price, isExtra }; l.qty += qty; map.set(key, l);
+    };
+    const pkg = (d, hrs) => {
+      const we = isWeekend(d), price = (we ? u.we : u.wd)[hrs === 12 ? 0 : 1];
+      add(`${hrs}-${we}`, t.rent_hrs(hrs, we), 1, price, false);
+    };
+    const extraRate = d => isWeekend(d) ? (u.ex ? u.ex[1] : 15000) : (u.ex ? u.ex[0] : 10000);
+    const n24 = Math.floor(hours / 24), rem = hours - n24 * 24;
+    for (let i = 0; i < n24; i++) pkg(new Date(a.getTime() + i * 864e5), 24);
+    if (rem > 0) {
+      const d = new Date(a.getTime() + n24 * 864e5);
+      const exRate = extraRate(d);
+      if (n24 > 0 && rem <= EXTRA_MAX) add('x-' + (isWeekend(d) ? 'we' : 'wd'), t.extra_hrs(isWeekend(d)), rem, exRate, true);
+      else if (rem <= 12) pkg(d, 12);
+      else if (rem <= 12 + EXTRA_MAX) { pkg(d, 12); add('x-' + (isWeekend(d) ? 'we' : 'wd'), t.extra_hrs(isWeekend(d)), rem - 12, exRate, true); }
+      else pkg(d, 24);
+    }
+    const lines = [...map.values()].map(l => ({ ...l, total: l.qty * l.price }));
+    const subtotal = lines.reduce((s, l) => s + l.total, 0);
+    const dur = n24 > 0 ? `${n24} ${t.day_unit}${hours % 24 ? ' ' + (hours % 24) + ' ' + t.hr_unit : ''}` : `${hours} ${t.hr_unit}`;
+    return { state: 'ok', hours, dur, lines, subtotal, a, b };
+  }
+
+  // ---------- Header: unit + jadwal + estimasi ----------
+  const fld = (label, key, type) => `<button type="button" data-open="${type}" data-key="${key}" class="px-4 py-0.5 text-left"><span class="block text-[11px] text-neutral-500">${label}</span><span data-v="${key}"></span></button>`;
+  const box = inner => `<div class="grid grid-cols-2 divide-x divide-neutral-200 rounded-md border border-neutral-200 bg-white py-2.5 hover:border-neutral-300">${inner}</div>`;
+  function renderSched() {
+    const t = T_TXT();
+    $('sched').innerHTML = box(fld(t.lbl_start, 'start', 'date') + fld(t.lbl_end, 'end', 'date')) + box(fld(t.lbl_t1, 't1', 'time') + fld(t.lbl_t2, 't2', 'time'));
+  }
+
+  function renderEstimate(c) {
+    const t = T_TXT();
+    $('estimate').innerHTML = c.state === 'ok'
+      ? `<p class="text-[11px] text-neutral-500">${t.est_title}</p>
+         <p class="mt-1 text-3xl font-medium tracking-tight">${rp(c.subtotal)}</p>
+         <p class="mt-1 text-[11px] text-neutral-500">${esc(UNITS[unit].n)} · ${c.dur}</p>
+         <p class="mt-4 rounded bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-900">${t.est_note(rp(DP))}</p>`
+      : `<p class="text-[11px] text-neutral-500">${t.est_title}</p>
+         <p class="mt-1 text-sm font-medium text-neutral-400">${c.state === 'invalid' ? t.err_invalid_time : t.est_empty}</p>`;
+  }
+
+  function sync() {
+    const t = T_TXT();
+    const PH = { start: t.ph_date, end: t.ph_date, t1: t.ph_time, t2: t.ph_time };
+    document.querySelectorAll('[data-v]').forEach(el => {
+      const k = el.dataset.v, v = S[k] ? (k === 'start' || k === 'end' ? fmt(S[k]) : S[k]) : '';
+      el.textContent = v || PH[k];
+      el.className = 'mt-0.5 block text-[13px] ' + (v ? 'font-medium text-neutral-900' : 'text-neutral-400');
+    });
+    const u = UNITS[unit];
+    $('unitName').textContent = u.n;
+    if ($('unitImg')) $('unitImg').src = u.img || 'image/honda-new-beat-110cc.png';
+    $('unitTags').innerHTML = chip(t.year_prefix + u.y) + chip(u.t) + chip(u.cc + ' cc');
+    const c = calc();
+    if (c.state === 'ok') $('schErr').classList.add('hidden');
+    else if (c.state === 'invalid') { $('schErr').textContent = t.err_invalid_time; $('schErr').classList.remove('hidden'); }
+    renderEstimate(c);
+  }
+  const refresh = () => {
+    sync();
+    if (step === 3) renderReview();
+    if (step === 4) { renderPayment(); renderInvoice(calc()); }
+    else if (step === 3) renderInvoice(calc());
+  };
+
+  // ---------- Picker tanggal & waktu (sama dengan homepage) ----------
+  const pop = $('pop'); let cur = null, D = {}, T = {}, view = null;
+  const H = 28, PRE = ['08:00', '09:00', '12:00', '16:00', '18:00'];
+  const foot = ok => `<div class="mt-4 flex items-center justify-between"><button type="button" data-act="reset" class="text-xs font-medium underline">Reset</button><button type="button" data-act="ok" class="rounded bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700">${ok}</button></div>`;
+
+  function dateHTML() {
+    const t = T_TXT(), B = BULAN_DATA[curLang] || BULAN_DATA.id, DS = DAYS_SHORT[curLang] || DAYS_SHORT.id;
+    const y = view.getFullYear(), m = view.getMonth(), lead = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate();
+    let cells = '<span></span>'.repeat(lead);
+    for (let d = 1; d <= n; d++) {
+      const dt = new Date(y, m, d), past = dt < today, s = same(dt, D.start), e = same(dt, D.end), mid = D.start && D.end && dt > D.start && dt < D.end;
+      const cls = past ? 'text-neutral-300 line-through' : s || e ? 'rounded-md bg-blue-600 text-white' : mid ? 'bg-neutral-100' : 'rounded hover:bg-neutral-100';
+      cells += `<button type="button" ${past ? 'disabled' : `data-act="day" data-t="${dt.getTime()}"`} class="h-9 text-xs ${cls}">${d}</button>`;
+    }
+    const canPrev = view > new Date(today.getFullYear(), today.getMonth(), 1);
+    return `<h3 class="text-sm font-semibold">${t.pick_date_title}</h3>
+      <div class="mt-4 flex items-center justify-between"><span class="text-xs font-semibold">${B[m]} ${y}</span>
+        <span class="flex gap-1"><button type="button" data-act="prev" ${canPrev ? '' : 'disabled'} class="rounded px-2 py-1 text-xs hover:bg-neutral-100 disabled:opacity-30">‹</button><button type="button" data-act="next" class="rounded px-2 py-1 text-xs hover:bg-neutral-100">›</button></span></div>
+      <div class="mt-3 grid grid-cols-7 text-center text-[11px] text-neutral-400">${DS.map(x => `<span class="py-1">${x}</span>`).join('')}</div>
+      <div class="mt-1 grid grid-cols-7 text-center">${cells}</div>${foot(t.pick_date_btn)}`;
+  }
+
+  function timeHTML() {
+    const t = T_TXT();
+    const col = (id, n) => `<div id="${id}" class="no-scrollbar relative z-10 h-[196px] w-16 cursor-grab snap-y snap-mandatory overflow-y-auto py-[84px] text-center">${Array.from({ length: n }, (_, i) => `<div class="h-7 cursor-pointer snap-center select-none text-base leading-7">${pad(i)}</div>`).join('')}</div>`;
+    return `<h3 class="text-sm font-semibold">${T.title}</h3>
+      <div class="relative mt-3 flex items-center justify-center"><div class="absolute inset-x-4 top-[84px] h-7 rounded bg-neutral-100"></div>${col('wh', 24)}<span class="relative z-10 px-1 text-sm font-medium">:</span>${col('wm', 60)}</div>
+      <p class="mt-3 text-[11px] text-neutral-500">${t.pick_time_quick}</p>
+      <div class="mt-1.5 flex flex-wrap gap-1.5">${PRE.map(p => `<button type="button" data-act="preset" data-p="${p}">${p}</button>`).join('')}</div>${foot(t.pick_time_btn)}`;
+  }
+  const marks = () => pop.querySelectorAll('[data-p]').forEach(b => b.className = 'rounded border px-2.5 py-1 text-[11px] font-medium ' + (b.dataset.p === `${pad(T.h)}:${pad(T.m)}` ? 'border-blue-500 bg-blue-50 text-blue-900' : 'border-neutral-200 hover:bg-neutral-100'));
+  function bindWheel(id, key) {
+    const el = $(id), last = el.children.length - 1;
+    const paint = () => {
+      const pos = el.scrollTop / H, i = Math.max(0, Math.min(last, Math.round(pos))); T[key] = i;
+      [...el.children].forEach((c, j) => {
+        const d = Math.abs(j - pos);
+        c.style.opacity = Math.max(0.1, 1 - d * 0.35);
+        c.style.transform = `scale(${Math.max(0.75, 1 - d * 0.07)})`;
+        c.className = 'wheel-item h-7 cursor-pointer snap-center select-none text-base leading-7 ' + (j === i ? 'font-semibold' : 'font-normal');
+      });
+      marks();
+    };
+    el.onscroll = paint;
+    let y0 = 0, s0 = 0, down = false, drag = false;
+    el.onpointerdown = e => { if (e.pointerType === 'touch') return; down = true; drag = false; y0 = e.clientY; s0 = el.scrollTop; };
+    el.onpointermove = e => {
+      if (!down) return; const dy = e.clientY - y0;
+      if (!drag && Math.abs(dy) > 3) { drag = true; el.setPointerCapture(e.pointerId); el.classList.remove('snap-mandatory'); }
+      if (drag) el.scrollTop = s0 - dy;
+    };
+    const end = () => { if (!down) return; down = false; if (drag) { el.classList.add('snap-mandatory'); el.scrollTo({ top: Math.round(el.scrollTop / H) * H, behavior: 'smooth' }); } };
+    el.onpointerup = end; el.onpointercancel = end;
+    el.onclick = e => {
+      if (drag) { drag = false; return; }
+      const j = Math.floor((e.clientY - el.getBoundingClientRect().top + el.scrollTop - 84) / H);
+      if (j >= 0 && j <= last) el.scrollTo({ top: j * H, behavior: 'smooth' });
+    };
+    el.scrollTop = Math.max(0, (T[key] - 2) * H);
+    paint();
+    requestAnimationFrame(() => el.scrollTo({ top: T[key] * H, behavior: 'smooth' }));
+  }
+
+  function openPop(type, anchor) {
+    const t = T_TXT();
+    cur = { type, anchor };
+    if (type === 'date') { D = { start: S.start, end: S.end }; const b = S.start || today; view = new Date(b.getFullYear(), b.getMonth(), 1); }
+    else { const k = anchor.dataset.key, v = S[k] || (k === 't1' ? '09:00' : '17:00'); T = { key: k, title: k === 't1' ? t.pick_t1_title : t.pick_t2_title, h: +v.slice(0, 2), m: +v.slice(3) }; }
+    const r = anchor.parentElement.getBoundingClientRect(), w = type === 'date' ? 300 : 280;
+    pop.style.width = w + 'px'; pop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + scrollX + 'px'; pop.style.top = r.bottom + scrollY + 6 + 'px';
+    draw();
+  }
+  let popTimer = null;
+  function draw() {
+    clearTimeout(popTimer);
+    const wasHidden = pop.classList.contains('hidden');
+    pop.innerHTML = cur.type === 'date' ? dateHTML() : timeHTML();
+    if (wasHidden) {
+      pop.classList.remove('hidden', 'pop-open');
+      pop.classList.add('pop-closed');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        pop.classList.remove('pop-closed');
+        pop.classList.add('pop-open');
+      }));
+    } else {
+      pop.classList.remove('pop-closed');
+      pop.classList.add('pop-open');
+    }
+    if (cur.type === 'time') { bindWheel('wh', 'h'); bindWheel('wm', 'm'); }
+  }
+  const close = () => {
+    cur = null;
+    pop.classList.remove('pop-open');
+    pop.classList.add('pop-closed');
+    clearTimeout(popTimer);
+    popTimer = setTimeout(() => { if (!cur) pop.classList.add('hidden'); }, 210);
+  };
+
+  function act(a) {
+    const k = a.dataset.act;
+    if (cur.type === 'date') {
+      if (k === 'day') { const d = new Date(+a.dataset.t); if (!D.start || D.end) D = { start: d, end: null }; else if (d < D.start) D.start = d; else D.end = d; }
+      else if (k === 'prev' || k === 'next') view = new Date(view.getFullYear(), view.getMonth() + (k === 'next' ? 1 : -1), 1);
+      else if (k === 'reset') { D = {}; S.start = S.end = null; refresh(); }
+      else if (k === 'ok') { if (!D.start) return; S.start = D.start; S.end = D.end || D.start; close(); refresh(); return; }
+      draw();
+    } else {
+      if (k === 'preset') { const [h, m] = a.dataset.p.split(':'); $('wh').scrollTo({ top: h * H, behavior: 'smooth' }); $('wm').scrollTo({ top: m * H, behavior: 'smooth' }); }
+      if (k === 'reset') { S[T.key] = null; close(); refresh(); }
+      if (k === 'ok') {
+        const key = T.key, next = cur.anchor.parentElement.querySelector('[data-key="t2"]');
+        S[key] = `${pad(T.h)}:${pad(T.m)}`; close(); refresh();
+        if (key === 't1' && next) openPop('time', next);
+      }
+    }
+  }
+  document.addEventListener('click', e => {
+    const o = e.target.closest('[data-open]'), a = e.target.closest('[data-act]');
+    if (o) return openPop(o.dataset.open, o);
+    if (e.composedPath().includes(pop)) { if (a) act(a); return; }
+    if (cur) close();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && cur) close(); });
+
+  // ---------- Dialog ubah unit (dengan overview harga) ----------
+  const dlg = $('dlgUnit'); let picked = 0;
+  function renderUnitList() {
+    const t = T_TXT();
+    $('unitList').innerHTML = UNITS.map((u, i) => {
+      const sel = i === picked, c = calc(i);
+      const est = c.state === 'ok'
+        ? `<p class="text-xs font-semibold">${rp(c.subtotal)}</p><p class="text-[10px] text-neutral-500">${t.dlg_est} · ${c.dur}</p>`
+        : `<p class="text-[10px] text-neutral-400">${t.dlg_pick_sch}</p>`;
+      const cell = (v) => `<span class="text-right font-medium">${rp(v)}</span>`;
+      return `<label class="block cursor-pointer rounded-md border p-4 ${sel ? 'border-blue-500 ring-2 ring-blue-100' : 'border-neutral-200 hover:border-neutral-300'}">
+        <div class="flex items-start gap-3">
+          <input type="radio" name="unitPick" value="${i}" ${sel ? 'checked' : ''} class="mt-0.5 h-4 w-4 shrink-0 accent-blue-600">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0"><p class="text-xs font-semibold">${esc(u.n)}</p><p class="mt-0.5 text-[11px] text-neutral-500">${t.year_prefix}${u.y} · ${u.t} · ${u.cc} cc</p></div>
+              <div class="shrink-0 text-right">${est}</div>
+            </div>
+            <div class="mt-3 grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-1.5 border-t border-neutral-100 pt-3 text-[11px]">
+              <span></span><span class="text-right text-neutral-400">${t.dlg_12h}</span><span class="text-right text-neutral-400">${t.dlg_24h}</span>
+              <span class="text-neutral-500">${t.dlg_wd}</span>${cell(u.wd[0])}${cell(u.wd[1])}
+              <span class="text-neutral-500">${t.dlg_we}</span>${cell(u.we[0])}${cell(u.we[1])}
+              <span class="text-neutral-500">${t.dlg_ex}</span><span class="col-span-2 text-right font-medium">${rp(u.ex ? u.ex[0] : 10000)} / ${rp(u.ex ? u.ex[1] : 15000)}${t.per_hr}</span>
+            </div>
+          </div>
+        </div>
+      </label>`;
+    }).join('');
+    document.querySelectorAll('input[name="unitPick"]').forEach(r => r.onchange = () => { picked = +r.value; renderUnitList(); });
+  }
+  $('btnUnit').onclick = e => { e.stopPropagation(); picked = unit; renderUnitList(); dlg.showModal(); };
+  $('cancelUnit').onclick = () => dlg.close();
+  $('saveUnit').onclick = () => { unit = picked; refresh(); updateProgress(); dlg.close(); };
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+  // ---------- Validasi ----------
+  const rules = {
+    wa: v => /^(\+62|62|0)8[0-9]{8,12}$/.test(v.replace(/[\s-]/g, '')) || T_TXT().err_wa,
+    nama: v => v.trim().length >= 3 || T_TXT().err_nama,
+    email: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || T_TXT().err_email,
+    ecName: v => v.trim().length >= 2 || T_TXT().err_ec_name,
+    ecPhone: v => /^(\+62|62|0)[0-9]{8,13}$/.test(v.replace(/[\s-]/g, '')) || T_TXT().err_ec_phone,
+    ig: v => v.trim().length >= 2 || T_TXT().err_ig,
+    tt: v => v.trim().length >= 2 || T_TXT().err_tt,
+    tujuan: v => v.trim().length >= 10 || T_TXT().err_tujuan,
+    area: v => v.trim().length >= 2 || T_TXT().err_area,
+    alamat: v => v.trim().length >= 10 || T_TXT().err_alamat
+  };
+  const stepFields = { 1: ['wa', 'nama', 'email'], 2: ['ecName', 'ecPhone', 'ig', 'tt', 'ktp', 'tujuan', 'area', 'alamat'], 3: [], 4: ['proof'] };
+  const isFileField = id => id === 'ktp' || id === 'proof';
+  const getFileErr = id => id === 'ktp' ? T_TXT().err_ktp : T_TXT().err_proof;
+
+  function setError(el, msg) {
+    const p = el.parentElement.querySelector('.err');
+    if (p) { p.textContent = msg || ''; p.classList.toggle('hidden', !msg); }
+    el.classList.toggle('bad', !!msg);
+  }
+  function validateStep(n) {
+    const t = T_TXT();
+    let first = null;
+    const c = calc();
+    if (c.state !== 'ok') {
+      $('schErr').textContent = c.state === 'invalid' ? t.err_invalid_time : t.err_incomplete_sch;
+      $('schErr').classList.remove('hidden');
+      first = $('sched');
+    }
+    stepFields[n].forEach(id => {
+      const el = $(id);
+      const res = isFileField(id) ? (el.files.length > 0 || getFileErr(id)) : rules[id](el.value);
+      const msg = res === true ? '' : res;
+      setError(el, msg);
+      if (msg && !first) first = el.closest('div');
+    });
+    if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.focus?.(); }
+    return !first;
+  }
+
+  // ---------- Sidebar progress (ring berdasarkan input yang sudah diisi) ----------
+  const R = 8, C = 2 * Math.PI * R;
+  function filledOf(n) {
+    if (n === 3) return { d: $('agree').checked ? 1 : 0, t: 1 };
+    const ids = stepFields[n]; let d = 0;
+    ids.forEach(id => { const el = $(id); if (isFileField(id) ? el.files.length > 0 : rules[id](el.value) === true) d++; });
+    return { d, t: ids.length };
+  }
+  function updateProgress() {
+    const arc = $('ringArc'); if (!arc) return;
+    const { d, t } = filledOf(step);
+    arc.style.strokeDashoffset = C * (1 - d / t);
+    $('ringCount').textContent = `${d}/${t}`;
+  }
+  function renderStepper() {
+    const steps = T_TXT().steps;
+    $('stepper').innerHTML = steps.map((label, i) => {
+      const n = i + 1, active = n === step, done = n < step;
+      const right = done ? check : active
+        ? `<span class="flex items-center gap-2"><span id="ringCount" class="text-[10px] text-neutral-500"></span>
+            <svg class="h-[18px] w-[18px] -rotate-90" viewBox="0 0 20 20" fill="none" stroke-width="2.5">
+              <circle cx="10" cy="10" r="${R}" class="stroke-neutral-300"/>
+              <circle id="ringArc" cx="10" cy="10" r="${R}" stroke-linecap="round" class="ring-prog stroke-neutral-900" stroke-dasharray="${C}" style="stroke-dashoffset:${C}"/>
+            </svg></span>` : '';
+      return `<li class="flex items-center justify-between rounded px-3 py-2.5 text-xs ${active ? 'bg-neutral-100 font-medium text-neutral-900' : done ? 'text-neutral-900' : 'text-neutral-300'}">
+        <span class="flex items-center gap-3"><span class="w-3 text-center">${n}</span>${label}</span>${right}</li>`;
+    }).join('');
+    requestAnimationFrame(() => requestAnimationFrame(updateProgress));
+  }
+
+  // ---------- Navigasi ----------
+  function updateNextBtn() {
+    const t = T_TXT();
+    $('btnNext').innerHTML = (step === 3 ? t.btn_to_pay : step === 4 ? t.btn_submit : t.btn_next) + arrow;
+  }
+  function triggerStepReveals() {
+    document.querySelectorAll('.dia-reveal, .reveal').forEach(el => {
+      if (el.closest('.hidden')) return;
+      el.classList.add('is-visible');
+      if (el.classList.contains('dia-reveal')) {
+        el.addEventListener('animationend', () => el.classList.add('dia-done'), { once: true });
+      }
+    });
+  }
+  function go(n) {
+    step = n;
+    document.querySelectorAll('[data-step]').forEach(s => s.classList.toggle('hidden', +s.dataset.step !== n));
+    $('estimate').classList.toggle('hidden', n >= 3);
+    $('invoicePanel').classList.toggle('hidden', n < 3);
+    $('btnBack').classList.toggle('invisible', n === 1);
+    updateNextBtn();
+    renderStepper();
+    if (n === 3) renderReview();
+    if (n === 4) { renderPayment(); renderInvoice(calc()); }
+    requestAnimationFrame(triggerStepReveals);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  $('btnNext').onclick = () => {
+    if (step < 3) { if (validateStep(step)) go(step + 1); return; }
+    if (step === 3) {
+      const ok = $('agree').checked;
+      $('agreeErr').classList.toggle('hidden', ok);
+      if (ok && validateStep(3)) go(4);
+      return;
+    }
+    if (validateStep(4)) showSuccess();
+  };
+  $('btnBack').onclick = () => go(step - 1);
+  $('form').addEventListener('input', e => { if (e.target.matches('input, textarea')) setError(e.target, ''); updateProgress(); });
+  $('form').addEventListener('change', () => { $('agreeErr').classList.add('hidden'); updateProgress(); });
+
+  // ---------- Upload gambar (KTP & bukti DP) ----------
+  function bindUpload(id, prevId, labelId, keyDefLabel) {
+    $(id).addEventListener('change', e => {
+      const t = T_TXT(), f = e.target.files[0], prev = $(prevId);
+      const reset = msg => { e.target.value = ''; prev.classList.add('hidden'); $(labelId).textContent = t[keyDefLabel]; setError(e.target, msg); updateProgress(); };
+      if (!f) return reset('');
+      if (!/^image\/(png|jpeg)$/.test(f.type)) return reset(t.err_file_type);
+      if (f.size > 5 * 1024 * 1024) return reset(t.err_file_size);
+      prev.src = URL.createObjectURL(f); prev.classList.remove('hidden');
+      $(labelId).textContent = f.name; setError(e.target, ''); updateProgress();
+    });
+  }
+  bindUpload('ktp', 'ktpPreview', 'ktpLabel', 'ktp_upload');
+  bindUpload('proof', 'proofPreview', 'proofLabel', 'proof_upload');
+
+  // ---------- Review ----------
+  const row = (l, v) => `<div class="grid gap-1 py-2.5 sm:grid-cols-[150px_1fr]"><dt class="text-[11px] text-neutral-500">${l}</dt><dd class="whitespace-pre-line break-words text-xs font-medium">${esc(v || '-')}</dd></div>`;
+  const section = (title, target, rows) => `
+    <div class="rounded-md border border-neutral-200 p-4">
+      <div class="flex items-center justify-between"><h3 class="text-sm font-semibold">${title}</h3>
+        <button type="button" data-edit="${target}" class="text-xs font-medium underline">Edit</button></div>
+      <dl class="mt-2 divide-y divide-neutral-100">${rows}</dl></div>`;
+
+  function renderReview() {
+    const t = T_TXT(), v = id => $(id).value, u = UNITS[unit], c = calc();
+    const ktp = $('ktp').files[0]
+      ? `<div class="grid gap-1 py-2.5 sm:grid-cols-[150px_1fr]"><dt class="text-[11px] text-neutral-500">${t.lbl_ktp}</dt><dd><img src="${$('ktpPreview').src}" alt="${t.lbl_ktp}" class="max-h-32 rounded"></dd></div>`
+      : row(t.lbl_ktp, '-');
+    $('review').innerHTML =
+      section(t.rev_unit_sch, 'sched',
+        row(t.rev_unit, u.n) +
+        row(t.rev_start, S.start ? `${fmt(S.start)}, ${S.t1 || '-'}` : '-') +
+        row(t.rev_end, S.end ? `${fmt(S.end)}, ${S.t2 || '-'}` : '-') +
+        row(t.rev_dur, c.state === 'ok' ? c.dur : '-')) +
+      section(t.s1_title, 1, row('WhatsApp', v('wa')) + row(t.lbl_nama, v('nama')) + row(t.lbl_email, v('email'))) +
+      section(t.s2_title, 2,
+        row(t.rev_ec, `${v('ecName')} (${v('ecPhone')})`) + row('Instagram', v('ig')) + row('TikTok', v('tt')) + ktp +
+        row(t.rev_purpose, v('tujuan')) + row(t.rev_area, v('area')) + row(t.rev_addr, v('alamat')));
+    document.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => {
+      if (b.dataset.edit === 'sched') { window.scrollTo({ top: 0, behavior: 'smooth' }); $('sched').firstElementChild.firstElementChild.click(); }
+      else go(+b.dataset.edit);
+    });
+    renderInvoice(c);
+  }
+
+  // ---------- Pembayaran DP ----------
+  function renderPayment() {
+    const t = T_TXT();
+    $('dpAmount').textContent = rp(DP);
+    $('bankInfo').innerHTML = Object.entries(BANK).map(([k, val]) =>
+      `<div class="flex items-center justify-between py-2.5 text-xs"><dt class="text-neutral-500">${esc(t.bank_labels[k] || k)}</dt><dd class="font-medium">${esc(val)}</dd></div>`).join('');
+  }
+
+  // ---------- Invoice ----------
+  function renderInvoice(c) {
+    const t = T_TXT(), u = UNITS[unit], v = id => $(id).value.trim() || '-';
+    const meta = (l, val, sub) => `<div><p class="text-[10px] text-neutral-500">${l}</p><p class="mt-0.5 text-[11px] font-medium">${val}</p>${sub ? `<p class="text-[10px] text-neutral-500">${sub}</p>` : ''}</div>`;
+    const items = c.state === 'ok'
+      ? c.lines.map(l => `<div class="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 border-b border-neutral-100 px-2 py-2.5 text-[11px]">
+          <span>${esc(l.label)}</span><span class="text-right">${l.qty}${l.isExtra ? ' ' + t.hr_unit : 'x'}</span>
+          <span class="min-w-[64px] text-right">${rp(l.price)}</span><span class="min-w-[72px] text-right font-medium">${rp(l.total)}</span></div>`).join('')
+      : `<p class="px-2 py-6 text-center text-[11px] text-neutral-500">${c.state === 'invalid' ? t.err_invalid_time : t.inv_empty}</p>`;
+
+    $('invoice').innerHTML = `
+      <div class="flex items-start justify-between">
+        <!-- LOGO PLACEHOLDER (invoice) -->
+        <div class="flex h-8 w-24 items-center justify-center rounded border border-dashed border-neutral-300 text-[10px] text-neutral-400">Logo</div>
+        <span class="rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-medium">Draft</span>
+      </div>
+      <div class="mt-5 grid grid-cols-3 gap-3">
+        ${meta(t.inv_issued, fmtFull(new Date()))}
+        ${meta(t.inv_start, S.start ? fmtFull(S.start) : '-', S.t1 ? t.inv_at + S.t1 : '')}
+        ${meta(t.inv_end, S.end ? fmtFull(S.end) : '-', S.t2 ? t.inv_at + S.t2 : '')}
+      </div>
+      <div class="mt-5 grid grid-cols-2 gap-3">
+        <div><p class="text-[10px] text-neutral-500">${t.inv_billed_by}</p><p class="mt-0.5 text-xs font-semibold">Traverent Bandung</p><p class="text-[10px] leading-relaxed text-neutral-500">Bandung, Jawa Barat<br>WhatsApp 081804103710</p></div>
+        <div><p class="text-[10px] text-neutral-500">${t.inv_billed_to}</p><p class="mt-0.5 break-words text-xs font-semibold">${esc(v('nama'))}</p><p class="break-words text-[10px] leading-relaxed text-neutral-500">${esc(v('wa'))}<br>${esc(v('email'))}</p></div>
+      </div>
+      <div class="mt-5">
+        <div class="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 rounded bg-neutral-50 px-2 py-2 text-[10px] text-neutral-500">
+          <span>Item</span><span class="text-right">Qty</span><span class="min-w-[64px] text-right">${t.inv_price}</span><span class="min-w-[72px] text-right">${t.inv_amt}</span></div>
+        <p class="px-2 pt-2.5 text-[11px] font-semibold">${esc(u.n)}${c.state === 'ok' ? ` <span class="font-normal text-neutral-500">· ${c.dur}</span>` : ''}</p>
+        ${items}
+      </div>
+      ${c.state === 'ok' ? `
+      <div class="ml-auto mt-3 w-full max-w-[240px] rounded border border-neutral-100 p-3 text-[11px]">
+        <div class="flex justify-between py-1"><span class="text-neutral-500">Subtotal</span><span>${rp(c.subtotal)}</span></div>
+        <div class="mt-1 flex justify-between rounded bg-neutral-50 px-2 py-1.5 text-xs font-semibold"><span>Total</span><span>${rp(c.subtotal)}</span></div>
+        <div class="mt-1 flex justify-between py-1"><span class="text-neutral-500">${t.inv_dp}</span><span>- ${rp(DP)}</span></div>
+        <div class="flex justify-between py-1 font-semibold"><span>${t.inv_rem}</span><span>${rp(Math.max(0, c.subtotal - DP))}</span></div>
+      </div>` : ''}
+      <div class="mt-5 text-[10px] leading-relaxed text-neutral-500">
+        <p>Notes</p>
+        <p class="mt-0.5 text-neutral-900">${t.inv_notes(EXTRA_MAX, rp(u.ex ? u.ex[0] : 10000), rp(u.ex ? u.ex[1] : 15000))}</p>
+      </div>`;
+  }
+
+  // ---------- Layar sukses ----------
+  function sealSVG() {
+    const pts = [];
+    for (let i = 0; i < 180; i++) {
+      const t = i / 180 * 2 * Math.PI, r = 45 + 3.4 * Math.cos(10 * t);
+      pts.push((50 + r * Math.cos(t)).toFixed(2) + ',' + (50 + r * Math.sin(t)).toFixed(2));
+    }
+    return `<svg viewBox="0 0 100 100" class="h-28 w-28" fill="none"><polygon points="${pts.join(' ')}" class="fill-lime-200"/><path d="M33 51l12 12 22-25" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" class="stroke-green-900"/></svg>`;
+  }
+  function fileToSmallDataUrl(file) {
+    return new Promise(resolve => {
+      if (!file) return resolve('');
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, 700 / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', 0.72));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(''); };
+      img.src = url;
+    });
+  }
+
+  async function showSuccess() {
+    const t = T_TXT(), c = calc(), now = new Date(), u = UNITS[unit];
+    const [ktpDataUrl, proofDataUrl] = await Promise.all([
+      fileToSmallDataUrl($('ktp').files[0]),
+      fileToSmallDataUrl($('proof').files[0])
+    ]);
+    let orderId = Math.floor(1e7 + Math.random() * 9e7);
+    try {
+      if (window.TraverentDemo) {
+        const created = window.TraverentDemo.createOrder({
+          nama: $('nama').value.trim(),
+          wa: $('wa').value.trim(),
+          email: $('email').value.trim(),
+          ecName: $('ecName').value.trim(),
+          ecPhone: $('ecPhone').value.trim(),
+          ig: $('ig').value.trim(),
+          tt: $('tt').value.trim(),
+          tujuan: $('tujuan').value.trim(),
+          area: $('area').value.trim(),
+          alamat: $('alamat').value.trim(),
+          unit: u.n,
+          s: withTime(S.start, S.t1).toISOString(),
+          e: withTime(S.end, S.t2).toISOString(),
+          ktpDataUrl,
+          proofDataUrl,
+          dpAmount: DP
+        });
+        if (created && created.id) orderId = created.id;
+      }
+    } catch (_) {}
+    const stamp = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${String(now.getFullYear()).slice(2)} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const r = (l, val) => `<div class="flex items-center justify-between gap-4 py-3 text-xs"><dt class="text-neutral-400">${l}</dt><dd class="text-right font-medium">${esc(val)}</dd></div>`;
+    $('seal').innerHTML = sealSVG();
+    $('okRows').innerHTML =
+      r(t.ok_order_id, orderId) + r(t.ok_unit, u.n) +
+      r(t.ok_period, `${fmt(S.start)} – ${fmt(S.end)}`) +
+      r(t.ok_method, t.ok_method_val) + r(t.ok_datetime, stamp) +
+      r(t.ok_dp, rp(DP)) + r(t.ok_total, c.state === 'ok' ? rp(c.subtotal) : '-');
+    close();
+    $('app').classList.add('hidden');
+    $('success').classList.remove('hidden');
+    window.scrollTo({ top: 0 });
+  }
+
+  function setLanguage(lang) {
+    curLang = lang === 'en' ? 'en' : 'id';
+    localStorage.setItem('traverent_lang', curLang);
+    document.documentElement.lang = curLang;
+    const t = T_TXT();
+    document.title = t.page_title;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.dataset.i18n;
+      if (t[k]) el.textContent = t[k];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const k = el.dataset.i18nHtml;
+      if (t[k]) el.innerHTML = t[k];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      const k = el.dataset.i18nPh;
+      if (t[k]) el.placeholder = t[k];
+    });
+    if (!$('ktp').files.length) $('ktpLabel').textContent = t.ktp_upload;
+    if (!$('proof').files.length) $('proofLabel').textContent = t.proof_upload;
+    const btnId = $('lang-id'), btnEn = $('lang-en');
+    if (btnId && btnEn) {
+      if (curLang === 'en') {
+        btnEn.className = 'rounded px-2.5 py-1 transition-colors bg-neutral-900 font-semibold text-white';
+        btnId.className = 'rounded px-2.5 py-1 transition-colors text-neutral-500 hover:text-neutral-900';
+      } else {
+        btnId.className = 'rounded px-2.5 py-1 transition-colors bg-neutral-900 font-semibold text-white';
+        btnEn.className = 'rounded px-2.5 py-1 transition-colors text-neutral-500 hover:text-neutral-900';
+      }
+    }
+    renderSched();
+    renderStepper();
+    updateNextBtn();
+    refresh();
+    if (cur) draw();
+    if (dlg.open) renderUnitList();
+  }
+
+  $('lang-id').onclick = () => setLanguage('id');
+  $('lang-en').onclick = () => setLanguage('en');
+
+  // ---------- Init ----------
+  setLanguage(curLang);
+  go(1);
+</script>
+</body>
+</html>

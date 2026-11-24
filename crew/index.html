@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Login Kru | Traverent Bandung</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="../image/favico.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="../demo-store.js"></script>
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } }
+
+  const CREW_APP_URL = 'app.html';
+  const CREW_AUTH_KEY = 'traverent_crew_session';
+</script>
+<style>
+  @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .anim-in { animation: fade-up .4s cubic-bezier(.22,1,.36,1) both; }
+  .anim-delay { animation-delay: .08s; }
+  @media (prefers-reduced-motion: reduce) { .anim-in { animation: none; } }
+</style>
+</head>
+<body class="min-h-dvh bg-neutral-100 font-sans text-neutral-900 antialiased">
+
+  <main class="mx-auto flex h-dvh w-full max-w-md flex-col overflow-hidden bg-white">
+
+    <!-- ============ BAGIAN ATAS: COVER IMAGE ============ -->
+    <div class="anim-in flex min-h-0 flex-1 flex-col p-4 pb-0">
+      <div class="h-full w-full flex-1 rounded-lg bg-neutral-100 bg-cover bg-center" style="background-image:url('../image/bg-login.jpg')"></div>
+    </div>
+
+    <!-- ============ BAGIAN BAWAH: FORM LOGIN ============ -->
+    <div class="anim-in anim-delay px-5 pb-8 pt-6">
+      <h1 class="text-[26px] font-semibold leading-tight tracking-tight text-neutral-900">Masuk ke akun kru</h1>
+      <p class="mt-1.5 text-sm leading-relaxed text-neutral-500">Masukkan nomor telepon dan password yang terdaftar.</p>
+
+      <form id="crew-login-form" novalidate class="mt-6 space-y-4">
+        <!-- Input Nomor Telepon -->
+        <div>
+          <label for="phone" class="block text-xs font-medium text-neutral-800">Nomor Telepon</label>
+          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="08123456789"
+            class="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-300">
+        </div>
+
+        <!-- Input Password -->
+        <div>
+          <div class="flex items-center justify-between">
+            <label for="password" class="block text-xs font-medium text-neutral-800">Password</label>
+            <button type="button" id="forgot-btn" class="text-xs font-medium text-neutral-700 hover:text-blue-600">Lupa password?</button>
+          </div>
+          <input id="password" name="password" type="password" autocomplete="current-password"
+            class="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-300">
+        </div>
+
+        <!-- Pesan Validasi / Info -->
+        <p id="form-msg" role="alert" class="hidden rounded-lg px-3.5 py-2.5 text-xs"></p>
+
+        <!-- Tombol Masuk -->
+        <button type="submit" class="mt-2 w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800">
+          Masuk
+        </button>
+      </form>
+    </div>
+
+  </main>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const phoneEl = $('phone'), pwEl = $('password'), msgEl = $('form-msg');
+
+  function showMsg(text, type = 'error') {
+    msgEl.textContent = text;
+    msgEl.className = `rounded-lg px-3.5 py-2.5 text-xs ${type === 'error' ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-900'}`;
+    msgEl.classList.remove('hidden');
+  }
+
+  // Normalisasi nomor telepon Indonesia (08xxx / +628xxx -> 08xxx)
+  function normalizePhone(raw) {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('62')) return '0' + digits.slice(2);
+    return digits;
+  }
+
+  // Info lupa password
+  $('forgot-btn').addEventListener('click', () => {
+    showMsg('Hubungi admin Traverent Bandung untuk mereset password akun kru kamu.', 'info');
+  });
+
+  // Demo mode: langsung masuk tanpa validasi apapun
+  $('crew-login-form').addEventListener('submit', e => {
+    e.preventDefault();
+    location.replace(CREW_APP_URL);
+  });
+  if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+</script>
+</body>
+</html>

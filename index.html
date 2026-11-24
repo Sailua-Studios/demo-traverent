@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sewa Motor di Bandung | Traverent Bandung</title>
+<link rel="icon" type="image/png" href="image/favico.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } }
+</script>
+<style type="text/tailwindcss">
+  html { scroll-behavior: smooth; }
+  details summary::-webkit-details-marker { display: none; }
+  details[open] .plus { transform: rotate(45deg); }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+  .rings { background: repeating-radial-gradient(circle at center, theme('colors.neutral.300') 0 1px, transparent 1px 7px); }
+
+  /* Magic UI - Dia Text Reveal (for headings) */
+  @keyframes diaSweep {
+    0% { background-position: 100% 0; opacity: 0.25; transform: translateY(8px); }
+    15% { opacity: 1; }
+    100% { background-position: 0% 0; opacity: 1; transform: translateY(0); }
+  }
+  .dia-reveal {
+    opacity: 0;
+  }
+  .dia-reveal.is-visible {
+    opacity: 1;
+    background-image: linear-gradient(90deg, var(--dia-end, #171717) 0%, var(--dia-end, #171717) 35%, #2563eb 52%, #60a5fa 66%, transparent 82%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: diaSweep 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .dia-reveal.is-visible * {
+    color: transparent;
+  }
+  .dia-reveal.dia-done,
+  .dia-reveal.dia-done * {
+    background-image: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    color: revert-layer;
+    animation: none !important;
+  }
+
+  /* Spell UI - Blur Reveal (for About paragraph) */
+  .spell-word {
+    display: inline-block;
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(6px);
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), filter 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, filter, transform;
+  }
+  .spell-visible .spell-word {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+
+  /* Simple Reveal (for body text & components) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Smooth FAQ Accordion */
+  .faq-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+  }
+  .faq-item.is-open .faq-body {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  .faq-inner { overflow: hidden; }
+  .faq-item .plus { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  .faq-item.is-open .plus { transform: rotate(45deg); }
+
+  /* Date & Time Picker Popup & Wheel Animation */
+  #pop {
+    transform-origin: top center;
+    transition: opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1), transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #pop.pop-closed {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+    pointer-events: none;
+  }
+  #pop.pop-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .wheel-item {
+    transition: opacity 0.14s ease-out, transform 0.14s ease-out;
+    will-change: opacity, transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dia-reveal, .reveal, .spell-word {
+      opacity: 1 !important;
+      filter: none !important;
+      transform: none !important;
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+<!--
+  Radius rule: only `rounded` (4px) and `rounded-md` (6px).
+  Outer containers = rounded-md, inner elements = rounded.
+  rounded-full is kept only for true circles (avatars, arrow buttons, benefit icon).
+-->
+</head>
+<body class="bg-white font-sans text-neutral-900 antialiased">
+
+<!-- ================= HERO ================= -->
+<section class="p-3">
+  <div class="relative flex min-h-[700px] flex-col overflow-hidden rounded-md bg-neutral-700 p-3">
+    <!-- HERO IMAGE PLACEHOLDER: replace this div with <img src="..." class="absolute inset-0 h-full w-full object-cover" alt=""> -->
+    <img src="image/hero-section.png" alt="Sewa Motor di Bandung" class="absolute inset-0 h-full w-full object-cover">
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <!-- navbar -->
+    <nav class="relative z-10 mx-auto flex w-full max-w-4xl items-center justify-between rounded-md bg-white px-4 py-2.5">
+      <!-- LOGO -->
+      <a href="#" class="flex h-7 w-28 items-center justify-center">
+        <img src="image/logo-navbar.png" alt="Traverent Bandung" class="h-full w-full object-contain">
+      </a>
+      <div class="hidden items-center gap-6 text-xs text-neutral-600 md:flex">
+        <a href="#tentang" data-i18n="nav_about" class="hover:text-neutral-900">Tentang Kami</a>
+        <a href="#testimoni" data-i18n="nav_testi" class="hover:text-neutral-900">Testimoni</a>
+        <a href="#faq" data-i18n="nav_terms" class="hover:text-neutral-900">Syarat &amp; Ketentuan</a>
+        <a href="#faq" data-i18n="nav_faq" class="hover:text-neutral-900">FAQ</a>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Language Switcher -->
+        <div class="flex items-center rounded border border-neutral-200 bg-neutral-50 p-0.5 text-[11px] font-medium text-neutral-600">
+          <button type="button" id="lang-id" class="rounded px-2 py-0.5 transition-colors bg-white font-semibold text-neutral-900 shadow-sm">ID</button>
+          <button type="button" id="lang-en" class="rounded px-2 py-0.5 transition-colors text-neutral-500 hover:text-neutral-900">EN</button>
+        </div>
+        <a href="#unit" data-i18n="nav_start" class="rounded bg-blue-600 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-blue-700">Mulai Sewa</a>
+      </div>
+    </nav>
+
+    <!-- headline -->
+    <div class="relative z-10 mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center py-16 text-center text-white">
+      <span data-i18n="hero_pill" class="reveal rounded border border-white/30 bg-white/15 px-3 py-1 text-[11px] backdrop-blur">Mulai dari Rp 85.000 / 12 jam</span>
+      <h1 data-i18n="hero_title" style="--dia-end:#ffffff" class="dia-reveal mt-5 text-4xl font-medium leading-[1.1] tracking-tight sm:text-6xl">Sewa Motor di Bandung</h1>
+      <p data-i18n="hero_desc" class="reveal mt-4 max-w-md text-sm text-white/90" style="transition-delay:120ms">Menyediakan sewa motor murah di Bandung dengan layanan profesional &amp; unit motor yang prima.</p>
+    </div>
+
+    <!-- booking bar -->
+    <form class="reveal relative z-10 mx-auto w-full max-w-4xl rounded-md bg-white p-2" style="transition-delay:180ms" onsubmit="return false">
+      <div class="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+        <div id="hero-fields" class="contents"></div>
+        <button id="check" type="button" class="inline-flex items-center justify-center gap-2 rounded bg-blue-600 px-6 py-3 text-xs font-medium text-white hover:bg-blue-700"><span data-i18n="hero_check">Cek Ketersediaan</span>
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <p id="err" data-i18n="hero_err" class="hidden px-1 pt-2 text-[11px] text-red-600">Lengkapi tanggal dan waktu sewa terlebih dahulu.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ================= BENEFIT + UNIT MOTOR ================= -->
+<div class="bg-neutral-100">
+  <!-- Benefit -->
+  <section class="mx-auto max-w-6xl px-4 pb-6 pt-20">
+    <div class="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+      <h2 data-i18n-html="benefit_title" class="dia-reveal text-3xl font-medium leading-tight tracking-tight">Benefit sewa motor<br>di Traverent</h2>
+      <p data-i18n="benefit_desc" class="reveal max-w-xs text-xs text-neutral-500">Setiap penyewaan sudah termasuk perlengkapan dan layanan yang membuat perjalananmu di Bandung lebih nyaman.</p>
+    </div>
+    <div id="benefit-list" class="mt-8 grid gap-4 md:grid-cols-3"></div>
+  </section>
+
+  <!-- Unit Motor -->
+  <section id="unit" class="mx-auto max-w-6xl px-4 pb-20 pt-12">
+    <div class="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+      <h2 data-i18n="unit_title" class="dia-reveal text-3xl font-medium tracking-tight">List Unit Motor</h2>
+      <p data-i18n="unit_note" class="reveal w-fit rounded bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-900">Maksimal tambahan 3 jam. Lebih dari itu berlaku tarif normal 12 jam.</p>
+    </div>
+    <!-- filter -->
+    <div class="reveal mt-5 grid gap-2 rounded-md bg-white p-2 md:grid-cols-3">
+      <div id="filter-fields" class="contents"></div>
+      <input id="q" type="search" oninput="render()" placeholder="Cari unit motor..." class="min-h-[46px] rounded border border-neutral-200 px-3 text-xs outline-none placeholder:text-neutral-400 focus:border-neutral-400">
+    </div>
+    <p id="count" class="mt-4 text-xs text-neutral-500"></p>
+    <div id="motor-list" class="mt-3 grid gap-4 md:grid-cols-3"></div>
+  </section>
+</div>
+
+<!-- ================= ABOUT ================= -->
+<section id="tentang" class="mx-auto max-w-4xl px-4 py-24 text-center">
+  <span data-i18n="about_badge" class="reveal inline-block rounded border border-neutral-300 px-3 py-1 text-[11px] font-medium">Tentang Kami</span>
+  <p id="about-spell" class="mt-6 text-2xl font-medium leading-snug tracking-tight sm:text-[32px]">
+    <span data-i18n-html="about_p1" class="text-neutral-900">Berdiri sejak tahun 2018, Traverent memulai perjalanannya melalui <b>Traverent Bogor dan</b> terus berkembang menjadi salah satu penyedia layanan rental motor terkemuka di Bogor.</span>
+    <span data-i18n-html="about_p2" class="text-neutral-700">Pada tahun 2021, Traverent memperluas jangkauannya dengan membuka cabang kedua, <b>Traverent Bandung.</b></span>
+    <span data-i18n-html="about_p3" class="text-neutral-600">Sebagai bagian dari <b>Traverent Group,</b> kami berkomitmen untuk menyediakan layanan rental motor yang profesional dan terpercaya, serta terus memperluas jangkauan layanan ke berbagai kota di Indonesia.</span>
+  </p>
+</section>
+
+<!-- ================= TESTIMONI ================= -->
+<section id="testimoni" class="mx-auto max-w-6xl px-4 pb-24">
+  <div class="flex items-end justify-between">
+    <div>
+      <p data-i18n="testi_subtitle" class="reveal text-[11px] text-neutral-500">Ulasan pelanggan</p>
+      <h2 class="dia-reveal mt-1 text-3xl font-medium tracking-tight"><span data-i18n="testi_title_1">Apa kata</span> <span data-i18n="testi_title_2" class="text-neutral-400">pelanggan</span> <span data-i18n="testi_title_3">tentang layanan kami.</span></h2>
+    </div>
+    <div class="reveal flex gap-2">
+      <button id="prev" aria-label="Sebelumnya" class="grid h-9 w-9 place-items-center rounded-full bg-blue-600 text-white hover:bg-blue-700"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+      <button id="next" aria-label="Berikutnya" class="grid h-9 w-9 place-items-center rounded-full bg-blue-600 text-white hover:bg-blue-700"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+  </div>
+  <div id="slider" class="no-scrollbar mt-8 flex snap-x gap-4 overflow-x-auto"></div>
+</section>
+
+<!-- ================= BLOG ================= -->
+<section id="blog" class="mx-auto max-w-6xl px-4 pb-24">
+  <div class="rounded-md bg-neutral-50 p-5 sm:p-8">
+    <h2 class="dia-reveal text-3xl font-medium leading-tight tracking-tight"><span data-i18n="blog_title_1">Artikel kami untuk perjalanan</span><br><span data-i18n="blog_title_2" class="text-neutral-400">yang lebih seru &amp; nyaman</span></h2>
+    <p data-i18n="blog_desc" class="reveal mt-3 max-w-md text-xs text-neutral-500">Tips, rekomendasi destinasi, dan panduan seputar sewa motor di Bandung.</p>
+    <div id="blog-list" class="mt-6 grid gap-4 md:grid-cols-3"></div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq" class="mx-auto max-w-5xl px-4 pb-24 pt-16">
+  <h2 data-i18n-html="faq_title" class="dia-reveal text-center text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Pertanyaan yang<br>Sering Diajukan</h2>
+  <div id="faq-list" class="mx-auto mt-12 max-w-xl divide-y divide-neutral-200 border-y border-neutral-200"></div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-neutral-900 text-neutral-300">
+  <div class="mx-auto grid max-w-5xl gap-10 px-6 py-14 md:grid-cols-[2fr_1fr_1.2fr]">
+    <div>
+      <!-- LOGO (footer) -->
+      <a href="#" class="inline-flex h-8 items-center justify-start">
+        <img src="image/logo-footer.png" alt="Traverent Bandung" class="h-full w-auto object-contain object-left">
+      </a>
+      <p class="mt-4 text-3xl font-semibold leading-tight tracking-tight text-white"><span data-i18n="footer_title_1">Sewa motor.</span><br><span data-i18n="footer_title_2" class="text-neutral-500">Jelajahi Bandung.</span></p>
+    </div>
+    <div class="text-xs"><h4 data-i18n="footer_nav" class="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-500">Navigasi</h4>
+      <ul class="space-y-2"><li><a href="#unit" data-i18n="nav_unit" class="hover:text-white">Unit Motor</a></li><li><a href="#tentang" data-i18n="nav_about" class="hover:text-white">Tentang Kami</a></li><li><a href="#testimoni" data-i18n="nav_testi" class="hover:text-white">Testimoni</a></li><li><a href="#blog" data-i18n="nav_blog" class="hover:text-white">Blogs</a></li><li><a href="#faq" data-i18n="nav_faq" class="hover:text-white">FAQ</a></li></ul></div>
+    <div class="text-xs"><h4 data-i18n="footer_contact" class="mb-3 text-[10px] font-medium uppercase tracking-wider text-neutral-500">Hubungi Kami</h4>
+      <ul class="space-y-2.5">
+        <li class="flex items-center gap-2">
+          <a href="https://wa.me/6281804103710" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center h-9 w-9 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" aria-label="WhatsApp">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969S17.547 2 12.031 2zm5.813 14.125c-.25.703-1.438 1.344-2 1.422-.516.078-1.172.109-1.891-.125-.438-.141-.984-.328-1.688-.641-2.969-1.281-4.906-4.266-5.063-4.469-.141-.203-1.203-1.594-1.203-3.047 0-1.453.766-2.172 1.031-2.469.266-.297.594-.375.797-.375.203 0 .391.016.563.016.188 0 .438-.063.672.516.25.609.844 2.063.922 2.219.078.156.125.344.016.547-.094.203-.156.328-.297.5-.156.172-.313.391-.453.516-.141.141-.297.297-.125.594.172.297.766 1.266 1.641 2.047 1.125 1 2.078 1.313 2.375 1.469.297.141.469.125.641-.078.172-.203.75-.875.953-1.172.203-.297.406-.25.672-.156.266.094 1.719.813 2.016.953.297.156.484.219.563.344.078.125.078.734-.172 1.438z"/></svg>
+          </a>
+          <a href="mailto:traverent.bdg@gmail.com" class="flex items-center justify-center h-9 w-9 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" aria-label="Email">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </a>
+          <a href="https://www.instagram.com/traverent_bandung" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center h-9 w-9 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" aria-label="Instagram">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          </a>
+          <a href="https://web.facebook.com/traverent.bandung" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center h-9 w-9 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors" aria-label="Facebook">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z"/></svg>
+          </a>
+        </li>
+        <li class="pt-1 text-neutral-400 leading-relaxed">Jl. Peta Gg. Pst. Muhammadiyah No.197, RT.05/RW.02, Pelindung Hewan, Kec. Astanaanyar, Kota Bandung, Jawa Barat 40243</li>
+      </ul></div>
+  </div>
+  <div data-i18n="footer_copy" class="border-t border-white/10 px-6 py-5 text-center text-[11px] text-neutral-500">© 2026 Traverent Bandung. Bagian dari Traverent Group.</div>
+</footer>
+
+<div id="pop" class="pop-closed absolute z-50 hidden rounded-md border border-neutral-200 bg-white p-4 shadow-lg"></div>
+
+<script src="demo-store.js"></script>
+<script>
+  const arrow = '<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+  // ---- i18n Dictionary ----
+  let curLang = localStorage.getItem('traverent_lang') || 'id';
+  const I18N = {
+    id: {
+      page_title: 'Sewa Motor di Bandung | Traverent Bandung',
+      nav_about: 'Tentang Kami', nav_testi: 'Testimoni', nav_terms: 'Syarat & Ketentuan', nav_faq: 'FAQ', nav_start: 'Mulai Sewa', nav_unit: 'Unit Motor', nav_blog: 'Blogs',
+      hero_pill: 'Mulai dari Rp 85.000 / 12 jam', hero_title: 'Sewa Motor di Bandung', hero_desc: 'Menyediakan sewa motor murah di Bandung dengan layanan profesional & unit motor yang prima.',
+      hero_check: 'Cek Ketersediaan', hero_err: 'Lengkapi tanggal dan waktu sewa terlebih dahulu.',
+      lbl_start: 'Tanggal Sewa', lbl_end: 'Tanggal Kembali', lbl_t1: 'Waktu Sewa', lbl_t2: 'Waktu Kembali',
+      ph_date: 'Pilih tanggal', ph_time: 'Pilih waktu',
+      pick_date_title: 'Pilih Tanggal Sewa', pick_date_btn: 'Pilih Tanggal',
+      pick_t1_title: 'Pilih Waktu Sewa', pick_t2_title: 'Pilih Waktu Kembali', pick_time_quick: 'Pilihan cepat', pick_time_btn: 'Pilih Waktu',
+      benefit_title: 'Benefit sewa motor<br>di Traverent',
+      benefit_desc: 'Setiap penyewaan sudah termasuk perlengkapan dan layanan yang membuat perjalananmu di Bandung lebih nyaman.',
+      unit_title: 'List Unit Motor', unit_note: 'Maksimal tambahan 3 jam. Lebih dari itu berlaku tarif normal 12 jam.',
+      search_ph: 'Cari unit motor...', count_units: 'unit motor', count_avail: 'unit tersedia',
+      year_prefix: 'Tahun ', h12: '12 Jam', h24: '24 Jam', per_hr: '/jam',
+      rate_label: 'Tarif sewa per unit', wd_label: 'Weekday (Senin – Kamis)', we_label: 'Weekend (Jumat – Minggu / Tanggal Merah)',
+      extra_label: 'Extra Hours', rent_now: 'Sewa Sekarang', empty_unit: 'Tidak ada unit yang tersedia untuk tanggal atau pencarian ini. Coba ubah tanggal atau kata kunci.',
+      about_badge: 'Tentang Kami',
+      about_p1: 'Berdiri sejak tahun 2018, Traverent memulai perjalanannya melalui <b>Traverent Bogor dan</b> terus berkembang menjadi salah satu penyedia layanan rental motor terkemuka di Bogor.',
+      about_p2: 'Pada tahun 2021, Traverent memperluas jangkauannya dengan membuka cabang kedua, <b>Traverent Bandung.</b>',
+      about_p3: 'Sebagai bagian dari <b>Traverent Group,</b> kami berkomitmen untuk menyediakan layanan rental motor yang profesional dan terpercaya, serta terus memperluas jangkauan layanan ke berbagai kota di Indonesia.',
+      testi_subtitle: 'Ulasan pelanggan', testi_title_1: 'Apa kata', testi_title_2: 'pelanggan', testi_title_3: 'tentang layanan kami.',
+      blog_title_1: 'Artikel kami untuk perjalanan', blog_title_2: 'yang lebih seru & nyaman',
+      blog_desc: 'Tips, rekomendasi destinasi, dan panduan seputar sewa motor di Bandung.',
+      faq_title: 'Pertanyaan yang<br>Sering Diajukan',
+      footer_title_1: 'Sewa motor.', footer_title_2: 'Jelajahi Bandung.', footer_nav: 'Navigasi', footer_contact: 'Hubungi Kami',
+      footer_copy: '© 2026 Traverent Bandung. Bagian dari Traverent Group.'
+    },
+    en: {
+      page_title: 'Motorbike Rental in Bandung | Traverent Bandung',
+      nav_about: 'About Us', nav_testi: 'Testimonials', nav_terms: 'Terms & Conditions', nav_faq: 'FAQ', nav_start: 'Rent Now', nav_unit: 'Motorbikes', nav_blog: 'Blogs',
+      hero_pill: 'Starting from IDR 85,000 / 12 hrs', hero_title: 'Motorbike Rental in Bandung', hero_desc: 'Affordable motorbike rentals in Bandung with professional service & top-condition motorbikes.',
+      hero_check: 'Check Availability', hero_err: 'Please complete rental dates and times first.',
+      lbl_start: 'Rental Date', lbl_end: 'Return Date', lbl_t1: 'Pickup Time', lbl_t2: 'Return Time',
+      ph_date: 'Select date', ph_time: 'Select time',
+      pick_date_title: 'Select Rental Date', pick_date_btn: 'Select Date',
+      pick_t1_title: 'Select Pickup Time', pick_t2_title: 'Select Return Time', pick_time_quick: 'Quick select', pick_time_btn: 'Select Time',
+      benefit_title: 'Benefits of renting<br>at Traverent',
+      benefit_desc: 'Every rental includes gear and services to make your trip in Bandung more comfortable.',
+      unit_title: 'Motorbike Fleet', unit_note: 'Maximum 3 hours extension. Beyond that, standard 12-hour rate applies.',
+      search_ph: 'Search motorbike...', count_units: 'motorbikes', count_avail: 'units available',
+      year_prefix: 'Year ', h12: '12 Hours', h24: '24 Hours', per_hr: '/hr',
+      rate_label: 'Rental rate per unit', wd_label: 'Weekday (Mon – Thu)', we_label: 'Weekend (Fri – Sun / Public Holidays)',
+      extra_label: 'Extra Hours', rent_now: 'Book Now', empty_unit: 'No motorbikes available for this date or search. Try changing dates or keyword.',
+      about_badge: 'About Us',
+      about_p1: 'Founded in 2018, Traverent began its journey as <b>Traverent Bogor and</b> has grown into one of the leading motorbike rental providers in Bogor.',
+      about_p2: 'In 2021, Traverent expanded its reach by opening its second branch, <b>Traverent Bandung.</b>',
+      about_p3: 'As part of <b>Traverent Group,</b> we are committed to providing professional and reliable motorbike rental services while continuing to expand across various cities in Indonesia.',
+      testi_subtitle: 'Customer reviews', testi_title_1: 'What', testi_title_2: 'customers', testi_title_3: 'say about our service.',
+      blog_title_1: 'Our articles for a', blog_title_2: 'more fun & comfortable trip',
+      blog_desc: 'Tips, destination recommendations, and guides for motorbike rentals in Bandung.',
+      faq_title: 'Frequently Asked<br>Questions',
+      footer_title_1: 'Rent a bike.', footer_title_2: 'Explore Bandung.', footer_nav: 'Navigation', footer_contact: 'Contact Us',
+      footer_copy: '© 2026 Traverent Bandung. Part of Traverent Group.'
+    }
+  };
+
+  // ---- Benefit ----
+  const BENEFITS_DATA = {
+    id: [
+      ['Helm, Jas Hujan, &amp; Gembok', 'Setiap unit dilengkapi dengan 2 helm, 2 jas hujan &amp; gembok (berdasarkan permintaan untuk periode sewa jangka panjang).', '<path d="M4 15a8 8 0 0 1 16 0v2a2 2 0 0 1-2 2h-3l-2-3H8a4 4 0 0 1-4-4z"/>'],
+      ['Motor Baru &amp; Terawat', '<b class="font-semibold text-neutral-700">Traverent</b> menyediakan unit Honda terbaru &amp; terawat.', '<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-3-8h-3M14 9h3l1 8"/>'],
+      ['Antar Jemput Hotel', 'Tersedia layanan antar-ambil ke hotel.', '<path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>']
+    ],
+    en: [
+      ['Helmets, Raincoats &amp; Padlock', 'Each unit includes 2 helmets, 2 raincoats &amp; a padlock (upon request for long-term rentals).', '<path d="M4 15a8 8 0 0 1 16 0v2a2 2 0 0 1-2 2h-3l-2-3H8a4 4 0 0 1-4-4z"/>'],
+      ['New &amp; Well-Maintained Bikes', '<b class="font-semibold text-neutral-700">Traverent</b> provides the latest &amp; well-maintained Honda units.', '<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-3-8h-3M14 9h3l1 8"/>'],
+      ['Hotel Delivery &amp; Pickup', 'Hotel delivery and pickup service is available.', '<path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>']
+    ]
+  };
+  function renderBenefits() {
+    const benefits = BENEFITS_DATA[curLang] || BENEFITS_DATA.id;
+    document.getElementById('benefit-list').innerHTML = benefits.map((b, i) => `
+      <article class="reveal rounded-md bg-white p-4" style="transition-delay:${i * 80}ms">
+        <div class="relative h-32">
+          <div class="rings absolute inset-0" style="-webkit-mask-image:radial-gradient(circle,#000 30%,transparent 70%);mask-image:radial-gradient(circle,#000 30%,transparent 70%)"></div>
+          <span class="absolute left-1/2 top-1/2 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">${b[2]}</svg></span>
+        </div>
+        <h3 class="mt-2 text-sm font-semibold">${b[0]}</h3>
+        <p class="mt-1.5 text-xs leading-relaxed text-neutral-500">${b[1]}</p>
+      </article>`).join('');
+  }
+
+  // ---- Picker tanggal & waktu (format 24 jam) ----
+  const $ = id => document.getElementById(id), pad = n => String(n).padStart(2, '0');
+  const HARI_DATA = {
+    id: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+    en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  };
+  const BULAN_DATA = {
+    id: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+    en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  };
+  const DAYS_SHORT = {
+    id: ['S', 'S', 'R', 'K', 'J', 'S', 'M'],
+    en: ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+  };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const S = { start: null, end: null, t1: null, t2: null };            // kosong di awal
+  const fmt = d => {
+    const H = HARI_DATA[curLang] || HARI_DATA.id, B = BULAN_DATA[curLang] || BULAN_DATA.id;
+    return `${H[d.getDay()]}, ${d.getDate()} ${B[d.getMonth()]}`;
+  };
+  const same = (a, b) => a && b && a.getTime() === b.getTime();
+
+  const fld = (label, key, type) => `<button type="button" data-open="${type}" data-key="${key}" class="px-4 py-0.5 text-left"><span class="block text-[11px] text-neutral-500">${label}</span><span data-v="${key}"></span></button>`;
+  const box = inner => `<div class="grid grid-cols-2 divide-x divide-neutral-200 rounded-md border border-neutral-200 bg-white py-2.5 hover:border-neutral-300">${inner}</div>`;
+  function renderFields() {
+    const d = I18N[curLang] || I18N.id;
+    const fields = box(fld(d.lbl_start, 'start', 'date') + fld(d.lbl_end, 'end', 'date')) + box(fld(d.lbl_t1, 't1', 'time') + fld(d.lbl_t2, 't2', 'time'));
+    $('hero-fields').innerHTML = fields; $('filter-fields').innerHTML = fields;
+  }
+
+  function sync() {
+    const d = I18N[curLang] || I18N.id;
+    const PH = { start: d.ph_date, end: d.ph_date, t1: d.ph_time, t2: d.ph_time };
+    document.querySelectorAll('[data-v]').forEach(el => {
+      const k = el.dataset.v, v = S[k] ? (k === 'start' || k === 'end' ? fmt(S[k]) : S[k]) : '';
+      el.textContent = v || PH[k];
+      el.className = 'mt-0.5 block text-[13px] ' + (v ? 'font-medium text-neutral-900' : 'text-neutral-400');
+    });
+    if (S.start && S.t1 && S.t2) $('err').classList.add('hidden');
+  }
+
+  const pop = $('pop'); let cur = null, D = {}, T = {}, view = null;
+  const H = 28, PRE = ['08:00', '09:00', '12:00', '16:00', '18:00'];
+  const foot = ok => `<div class="mt-4 flex items-center justify-between"><button type="button" data-act="reset" class="text-xs font-medium underline">Reset</button><button type="button" data-act="ok" class="rounded bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700">${ok}</button></div>`;
+
+  function dateHTML() {
+    const d = I18N[curLang] || I18N.id, B = BULAN_DATA[curLang] || BULAN_DATA.id, DS = DAYS_SHORT[curLang] || DAYS_SHORT.id;
+    const y = view.getFullYear(), m = view.getMonth(), lead = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate();
+    let cells = '<span></span>'.repeat(lead);
+    for (let day = 1; day <= n; day++) {
+      const dt = new Date(y, m, day), past = dt < today, s = same(dt, D.start), e = same(dt, D.end), mid = D.start && D.end && dt > D.start && dt < D.end;
+      const cls = past ? 'text-neutral-300 line-through' : s || e ? 'rounded-md bg-blue-600 text-white' : mid ? 'bg-neutral-100' : 'rounded hover:bg-neutral-100';
+      cells += `<button type="button" ${past ? 'disabled' : `data-act="day" data-t="${dt.getTime()}"`} class="h-9 text-xs ${cls}">${day}</button>`;
+    }
+    const canPrev = view > new Date(today.getFullYear(), today.getMonth(), 1);
+    return `<h3 class="text-sm font-semibold">${d.pick_date_title}</h3>
+      <div class="mt-4 flex items-center justify-between"><span class="text-xs font-semibold">${B[m]} ${y}</span>
+        <span class="flex gap-1"><button type="button" data-act="prev" ${canPrev ? '' : 'disabled'} class="rounded px-2 py-1 text-xs hover:bg-neutral-100 disabled:opacity-30">‹</button><button type="button" data-act="next" class="rounded px-2 py-1 text-xs hover:bg-neutral-100">›</button></span></div>
+      <div class="mt-3 grid grid-cols-7 text-center text-[11px] text-neutral-400">${DS.map(x => `<span class="py-1">${x}</span>`).join('')}</div>
+      <div class="mt-1 grid grid-cols-7 text-center">${cells}</div>${foot(d.pick_date_btn)}`;
+  }
+
+  function timeHTML() {
+    const d = I18N[curLang] || I18N.id;
+    const col = (id, n) => `<div id="${id}" class="no-scrollbar relative z-10 h-[196px] w-16 cursor-grab snap-y snap-mandatory overflow-y-auto py-[84px] text-center">${Array.from({ length: n }, (_, i) => `<div class="h-7 cursor-pointer snap-center select-none text-base leading-7">${pad(i)}</div>`).join('')}</div>`;
+    return `<h3 class="text-sm font-semibold">${T.title}</h3>
+      <div class="relative mt-3 flex items-center justify-center"><div class="absolute inset-x-4 top-[84px] h-7 rounded bg-neutral-100"></div>${col('wh', 24)}<span class="relative z-10 px-1 text-sm font-medium">:</span>${col('wm', 60)}</div>
+      <p class="mt-3 text-[11px] text-neutral-500">${d.pick_time_quick}</p>
+      <div class="mt-1.5 flex flex-wrap gap-1.5">${PRE.map(p => `<button type="button" data-act="preset" data-p="${p}">${p}</button>`).join('')}</div>${foot(d.pick_time_btn)}`;
+  }
+  const marks = () => pop.querySelectorAll('[data-p]').forEach(b => b.className = 'rounded border px-2.5 py-1 text-[11px] font-medium ' + (b.dataset.p === `${pad(T.h)}:${pad(T.m)}` ? 'border-blue-500 bg-blue-50 text-blue-900' : 'border-neutral-200 hover:bg-neutral-100'));
+  function bindWheel(id, key) {
+    const el = $(id), last = el.children.length - 1;
+    const paint = () => {                       // efek ala alarm iOS: makin jauh dari tengah, makin pudar & kecil
+      const pos = el.scrollTop / H, i = Math.max(0, Math.min(last, Math.round(pos))); T[key] = i;
+      [...el.children].forEach((c, j) => {
+        const d = Math.abs(j - pos);
+        c.style.opacity = Math.max(0.1, 1 - d * 0.35);
+        c.style.transform = `scale(${Math.max(0.75, 1 - d * 0.07)})`;
+        c.className = 'wheel-item h-7 cursor-pointer snap-center select-none text-base leading-7 ' + (j === i ? 'font-semibold' : 'font-normal');
+      });
+      marks();
+    };
+    el.onscroll = paint;                        // scroll mouse / trackpad / touch sudah native
+    let y0 = 0, s0 = 0, down = false, drag = false;
+    el.onpointerdown = e => { if (e.pointerType === 'touch') return; down = true; drag = false; y0 = e.clientY; s0 = el.scrollTop; };
+    el.onpointermove = e => {                   // geser dengan mouse (drag)
+      if (!down) return; const dy = e.clientY - y0;
+      if (!drag && Math.abs(dy) > 3) { drag = true; el.setPointerCapture(e.pointerId); el.classList.remove('snap-mandatory'); }
+      if (drag) el.scrollTop = s0 - dy;
+    };
+    const end = () => { if (!down) return; down = false; if (drag) { el.classList.add('snap-mandatory'); el.scrollTo({ top: Math.round(el.scrollTop / H) * H, behavior: 'smooth' }); } };
+    el.onpointerup = end; el.onpointercancel = end;
+    el.onclick = e => {                         // klik angka untuk memilih
+      if (drag) { drag = false; return; }
+      const j = Math.floor((e.clientY - el.getBoundingClientRect().top + el.scrollTop - 84) / H);
+      if (j >= 0 && j <= last) el.scrollTo({ top: j * H, behavior: 'smooth' });
+    };
+    el.scrollTop = Math.max(0, (T[key] - 2) * H);
+    paint();
+    requestAnimationFrame(() => el.scrollTo({ top: T[key] * H, behavior: 'smooth' }));
+  }
+
+  function openPop(type, anchor) {
+    const d = I18N[curLang] || I18N.id;
+    cur = { type, anchor };
+    if (type === 'date') { D = { start: S.start, end: S.end }; const b = S.start || today; view = new Date(b.getFullYear(), b.getMonth(), 1); }
+    else { const k = anchor.dataset.key, v = S[k] || (k === 't1' ? '09:00' : '17:00'); T = { key: k, title: k === 't1' ? d.pick_t1_title : d.pick_t2_title, h: +v.slice(0, 2), m: +v.slice(3) }; }
+    const r = anchor.parentElement.getBoundingClientRect(), w = type === 'date' ? 300 : 280;
+    pop.style.width = w + 'px'; pop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + scrollX + 'px'; pop.style.top = r.bottom + scrollY + 6 + 'px';
+    draw();
+  }
+  let popTimer = null;
+  function draw() {
+    clearTimeout(popTimer);
+    const wasHidden = pop.classList.contains('hidden');
+    pop.innerHTML = cur.type === 'date' ? dateHTML() : timeHTML();
+    if (wasHidden) {
+      pop.classList.remove('hidden', 'pop-open');
+      pop.classList.add('pop-closed');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        pop.classList.remove('pop-closed');
+        pop.classList.add('pop-open');
+      }));
+    } else {
+      pop.classList.remove('pop-closed');
+      pop.classList.add('pop-open');
+    }
+    if (cur.type === 'time') { bindWheel('wh', 'h'); bindWheel('wm', 'm'); }
+  }
+  const close = () => {
+    cur = null;
+    pop.classList.remove('pop-open');
+    pop.classList.add('pop-closed');
+    clearTimeout(popTimer);
+    popTimer = setTimeout(() => { if (!cur) pop.classList.add('hidden'); }, 210);
+  };
+
+  function act(a) {
+    const k = a.dataset.act;
+    if (cur.type === 'date') {
+      if (k === 'day') { const d = new Date(+a.dataset.t); if (!D.start || D.end) D = { start: d, end: null }; else if (d < D.start) D.start = d; else D.end = d; }
+      else if (k === 'prev' || k === 'next') view = new Date(view.getFullYear(), view.getMonth() + (k === 'next' ? 1 : -1), 1);
+      else if (k === 'reset') { D = {}; S.start = S.end = null; sync(); render(); }
+      else if (k === 'ok') { if (!D.start) return; S.start = D.start; S.end = D.end || D.start; close(); sync(); render(); return; }
+      draw();
+    } else {
+      if (k === 'preset') { const [h, m] = a.dataset.p.split(':'); $('wh').scrollTo({ top: h * H, behavior: 'smooth' }); $('wm').scrollTo({ top: m * H, behavior: 'smooth' }); }
+      if (k === 'reset') { S[T.key] = null; close(); sync(); render(); }
+      if (k === 'ok') {
+        const key = T.key, next = cur.anchor.parentElement.querySelector('[data-key="t2"]');
+        S[key] = `${pad(T.h)}:${pad(T.m)}`; close(); sync(); render();
+        if (key === 't1' && next) openPop('time', next);   // lanjut otomatis ke Waktu Kembali
+      }
+    }
+  }
+  document.addEventListener('click', e => {
+    const o = e.target.closest('[data-open]'), a = e.target.closest('[data-act]');
+    if (o) return openPop(o.dataset.open, o);
+    if (e.composedPath().includes(pop)) { if (a) act(a); return; }
+    if (cur) close();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && cur) close(); });
+
+  // ---- Data unit (DUMMY) ----
+  // booked = rentang hari (offset dari hari ini) saat unit sudah dipesan: [mulai, selesai]
+  const UNITS = [
+    { n: 'Honda New Beat', y: '2022–2026', t: 'Matic', cc: 110, wd: [85000, 95000], we: [105000, 120000], ex: [10000, 15000], img: 'image/honda-new-beat-110cc.png', booked: [[2, 4]] },
+    { n: 'Honda New Vario', y: '2022–2026', t: 'Matic', cc: 125, wd: [105000, 115000], we: [130000, 145000], ex: [15000, 20000], img: 'image/honda-new-vario-125cc.png', booked: [[0, 1], [6, 8]] },
+    { n: 'Yamaha New Gear', y: '2022–2026', t: 'Matic', cc: 125, wd: [95000, 105000], we: [115000, 130000], ex: [10000, 15000], img: 'image/yamaha-new-gear-125cc.png', booked: [] }
+  ];
+  const rp = n => 'Rp ' + n.toLocaleString('id-ID');
+  const chip = t => `<span class="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-900">${t}</span>`;
+  const row = (l, v) => `<div class="flex items-center justify-between py-1.5 text-xs"><span class="text-neutral-500">${l}</span><span class="font-semibold">${v}</span></div>`;
+  const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  function orderUrl(unitName) {
+    const p = new URLSearchParams({ unit: unitName });
+    if (S.start) p.set('start', ymd(S.start));
+    if (S.end) p.set('end', ymd(S.end));
+    if (S.t1) p.set('t1', S.t1);
+    if (S.t2) p.set('t2', S.t2);
+    return 'form-pemesanan.html?' + p.toString();
+  }
+  try {
+    const store = window.TraverentDemo && window.TraverentDemo.load();
+    if (store && store.RATES) {
+      UNITS.forEach(u => {
+        if (store.RATES[u.n]) {
+          u.wd = store.RATES[u.n][0];
+          u.we = store.RATES[u.n][1];
+          if (store.RATES[u.n][2]) u.ex = store.RATES[u.n][2];
+        }
+      });
+    }
+  } catch (_) {}
+
+  function render() {
+    const q = $('q').value.trim().toLowerCase(), use = S.start && S.end;
+    const so = use ? Math.round((S.start - today) / 864e5) : 0, eo = use ? Math.round((S.end - today) / 864e5) : 0;
+    const list = UNITS.filter(u => u.n.toLowerCase().includes(q) && (!use || u.booked.every(b => eo < b[0] || so > b[1])));
+    const d = I18N[curLang] || I18N.id;
+    $('count').textContent = use
+      ? `${list.length} ${d.count_avail} · ${fmt(S.start)} – ${fmt(S.end)}${S.t1 && S.t2 ? ` · ${S.t1} – ${S.t2}` : ''}`
+      : `${list.length} ${d.count_units}`;
+    $('motor-list').innerHTML = list.length ? list.map((m, i) => `
+      <article class="reveal rounded-md bg-white p-3" style="transition-delay:${i * 70}ms">
+        <!-- MOTOR IMAGE -->
+        <div class="flex h-52 items-center justify-center overflow-hidden rounded bg-neutral-100 p-3 text-xs text-neutral-400">
+          <img src="${m.img}" alt="${m.n}" class="h-full w-full object-contain">
+        </div>
+        <h3 class="mt-3 text-sm font-semibold">${m.n}</h3>
+        <div class="mt-2 flex flex-wrap gap-1.5">${chip(d.year_prefix + m.y)}${chip(m.t)}${chip(m.cc + ' cc')}</div>
+        <p class="mt-3 text-[11px] text-neutral-500">${d.rate_label}</p>
+        <div class="mt-2 divide-y divide-neutral-100 border-t border-neutral-100">
+          <p class="pb-1 pt-2 text-[11px] font-medium text-neutral-400">${d.wd_label}</p>
+          ${row(d.h12, rp(m.wd[0]))}${row(d.h24, rp(m.wd[1]))}
+          <p class="pb-1 pt-2 text-[11px] font-medium text-neutral-400">${d.we_label}</p>
+          ${row(d.h12, rp(m.we[0]))}${row(d.h24, rp(m.we[1]))}
+          ${row(d.extra_label, rp(m.ex ? m.ex[0] : 10000) + ' / ' + rp(m.ex ? m.ex[1] : 15000) + d.per_hr)}
+        </div>
+        <a href="${orderUrl(m.n)}" class="mt-3 flex items-center justify-center gap-2 rounded bg-neutral-100 py-2.5 text-xs font-medium hover:bg-blue-600 hover:text-white">${d.rent_now} ${arrow}</a>
+      </article>`).join('')
+      : `<p class="col-span-full rounded-md bg-white p-8 text-center text-xs text-neutral-500">${d.empty_unit}</p>`;
+    observeReveals();
+  }
+
+  $('check').onclick = e => {
+    e.stopPropagation();
+    const miss = !S.start ? 'start' : !S.t1 ? 't1' : !S.t2 ? 't2' : null;
+    if (miss) { $('err').classList.remove('hidden'); document.querySelector(`#hero-fields [data-key="${miss}"]`).click(); return; }
+    $('err').classList.add('hidden'); render();
+    $('unit').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // ---- Testimoni ----
+  const quote = '<svg class="h-6 w-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24"><path d="M10 6H4v7h4a4 4 0 0 1-4 4v2a6 6 0 0 0 6-6zm10 0h-6v7h4a4 4 0 0 1-4 4v2a6 6 0 0 0 6-6z"/></svg>';
+  const REVIEWS_DATA = {
+    id: [
+      ['Udah beberapa kali sewa di TRAVERENT BOGOR, dan baru kemaren sewa di cabang yg Bandung ini. Kualitas pelayanannya sama. Crewnya ramah, ontime juga, jelasnya jg bagus 👍', 'Fatima', 'Bogor', 'image/fatima.webp'],
+      ['Stafnya ramah banget. Motor kualitas bagus, jadi gak was-was traveling. Admin jelasinnya to the point, ga bertele-tele. Pro banget pokoknya. Recomeded utk sewa motor di Bandung.', 'Amos', 'Malang', 'image/amos.webp'],
+      ['TRAVERENT sangat membantu bagi para backpacker, respons cepat dan harga terjangkau. Pengiriman tepat waktu dan motor dalam kondisi baik. Sangat direkomendasikan!', 'Thalita', 'Jakarta', 'image/thalita.webp']
+    ],
+    en: [
+      ['I have rented several times at TRAVERENT BOGOR, and recently rented at this Bandung branch. Same great service quality. The crew is friendly, punctual, and explains things clearly 👍', 'Fatima', 'Bogor', 'image/fatima.webp'],
+      ['The staff is super friendly. Great motorbike quality, so no worries while traveling. The admin explains everything to the point and very professionally. Recommended for motorbike rental in Bandung.', 'Amos', 'Malang', 'image/amos.webp'],
+      ['TRAVERENT is super helpful for backpackers, fast response and affordable prices. On-time delivery and the motorbike is in great condition. Highly recommended!', 'Thalita', 'Jakarta', 'image/thalita.webp']
+    ]
+  };
+  function renderReviews() {
+    const reviews = REVIEWS_DATA[curLang] || REVIEWS_DATA.id;
+    document.getElementById('slider').innerHTML = reviews.map((r, i) => `
+      <figure class="reveal flex min-h-[300px] w-[85%] shrink-0 snap-start flex-col justify-between rounded-md bg-blue-50 p-5 md:w-[calc(33.333%-11px)]" style="transition-delay:${i * 80}ms">
+        <img src="${r[3]}" alt="${r[1]}" class="h-10 w-10 rounded-full object-cover">
+        <div>${quote}<blockquote class="mt-3 text-base font-medium leading-snug">${r[0]}</blockquote></div>
+        <figcaption class="mt-6 text-xs"><b class="block text-sm">${r[1]}</b><span class="text-neutral-500">${r[2]}</span></figcaption>
+      </figure>`).join('');
+  }
+  const slider = document.getElementById('slider');
+  document.getElementById('prev').onclick = () => slider.scrollBy({ left: -slider.clientWidth / 2, behavior: 'smooth' });
+  document.getElementById('next').onclick = () => slider.scrollBy({ left: slider.clientWidth / 2, behavior: 'smooth' });
+
+  // ---- Blog ----
+  const POSTS_DATA = {
+    id: [
+      { slug: '5-tempat-wisata-hits-di-bandung-pakai-motor', cat: 'Destinasi', title: '5 Tempat Wisata Hits di Bandung yang Asyik Dikunjungi Pakai Motor', date: '10 Jul 2026', img: 'image/blog-1.webp', author: 'Traverent' },
+      { slug: 'tips-aman-berkendara-motor-liburan-lembang', cat: 'Tips', title: 'Tips Aman Berkendara Motor Saat Liburan di Kawasan Lembang', date: '8 Jul 2026', img: 'image/blog-2.webp', author: 'Traverent' },
+      { slug: 'mengapa-rental-motor-praktis-solo-traveling', cat: 'Tips', title: 'Mengapa Rental Motor Lebih Praktis untuk Solo Traveling', date: '5 Jul 2026', img: 'image/blog-3.webp', author: 'Traverent' }
+    ],
+    en: [
+      { slug: '5-tempat-wisata-hits-di-bandung-pakai-motor', cat: 'Destination', title: '5 Popular Tourist Spots in Bandung Best Visited by Motorbike', date: 'Jul 10, 2026', img: 'image/blog-1.webp', author: 'Traverent' },
+      { slug: 'tips-aman-berkendara-motor-liburan-lembang', cat: 'Tips', title: 'Safe Motorbike Riding Tips for Your Lembang Holiday', date: 'Jul 8, 2026', img: 'image/blog-2.webp', author: 'Traverent' },
+      { slug: 'mengapa-rental-motor-praktis-solo-traveling', cat: 'Tips', title: 'Why Renting a Motorbike Is More Practical for Solo Traveling', date: 'Jul 5, 2026', img: 'image/blog-3.webp', author: 'Traverent' }
+    ]
+  };
+  function renderBlog() {
+    const posts = POSTS_DATA[curLang] || POSTS_DATA.id;
+    document.getElementById('blog-list').innerHTML = posts.map((p, i) => `
+      <article class="reveal" style="transition-delay:${i * 80}ms">
+        <a href="blog-detail.html?artikel=${p.slug}" class="group block">
+          <div class="h-52 overflow-hidden rounded bg-neutral-100">
+            <img src="${p.img}" alt="${p.title}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300">
+          </div>
+          <div class="mt-3 flex justify-between text-[11px] text-neutral-500"><span>${p.cat}</span><span>${p.date}</span></div>
+          <h3 class="mt-1 text-sm font-medium leading-snug group-hover:text-neutral-600">${p.title}</h3>
+          <div class="mt-3 flex items-center gap-2 text-[11px]"><img src="image/favico.png" alt="${p.author}" class="h-5 w-5 shrink-0 rounded-full object-cover">${p.author}</div>
+        </a>
+      </article>`).join('');
+  }
+
+  // ---- FAQ ----
+  const FAQS_DATA = {
+    id: [
+      ['Apa saja syarat sewa motor?', 'Siapkan KTP asli dan SIM C yang masih berlaku. Detail lain dikonfirmasi oleh admin saat reservasi.'],
+      ['Apakah ada layanan antar jemput?', 'Ya, tersedia layanan antar-ambil motor ke hotel di area Bandung.'],
+      ['Apakah helm dan jas hujan disediakan?', 'Setiap unit dilengkapi 2 helm, 2 jas hujan, dan gembok.'],
+      ['Bagaimana jika terlambat mengembalikan motor?', 'Maksimal tambahan 3 jam dengan tarif Rp 10.000/jam. Lebih dari itu berlaku tarif normal 12 jam.'],
+      ['Apakah bisa sewa jangka panjang?', 'Bisa. Hubungi admin via WhatsApp di 081804103710 untuk detail periode sewa jangka panjang.'],
+      ['Bagaimana cara reservasi?', 'Hubungi kami via WhatsApp di 081804103710 atau gunakan formulir di bagian atas halaman.']
+    ],
+    en: [
+      ['What are the requirements to rent a motorbike?', 'Prepare your original ID card (KTP) and a valid driver license (SIM C). Other details will be confirmed by our admin during reservation.'],
+      ['Is delivery and pickup service available?', 'Yes, motorbike delivery and pickup to hotels in the Bandung area is available.'],
+      ['Are helmets and raincoats provided?', 'Every unit comes with 2 helmets, 2 raincoats, and a padlock.'],
+      ['What if I return the motorbike late?', 'Up to 3 extra hours are charged at Rp 10,000/hr. Beyond that, the standard 12-hour rate applies.'],
+      ['Can I rent for a long-term period?', 'Yes. Contact our admin via WhatsApp at 081804103710 for long-term rental details.'],
+      ['How do I make a reservation?', 'Contact us via WhatsApp at 081804103710 or use the booking bar at the top of the page.']
+    ]
+  };
+  function renderFaq() {
+    const faqs = FAQS_DATA[curLang] || FAQS_DATA.id;
+    const list = document.getElementById('faq-list');
+    list.innerHTML = faqs.map((f, i) => `
+      <details class="reveal faq-item py-4${i === 0 ? ' is-open' : ''}" style="transition-delay:${i * 50}ms" ${i === 0 ? 'open' : ''}>
+        <summary class="flex cursor-pointer items-center justify-between text-sm font-medium"><span>${f[0]}</span><span class="plus text-xl font-light text-neutral-400">+</span></summary>
+        <div class="faq-body"><div class="faq-inner"><p class="pt-2 max-w-md text-xs leading-relaxed text-neutral-500">${f[1]}</p></div></div>
+      </details>`).join('');
+
+    const closeItem = el => {
+      if (!el.hasAttribute('open')) return;
+      el.classList.remove('is-open');
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { if (!el.classList.contains('is-open')) el.removeAttribute('open'); }, 320);
+    };
+    const openItem = el => {
+      clearTimeout(el._t);
+      el.setAttribute('open', '');
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-open')));
+    };
+
+    list.querySelectorAll('summary').forEach(sum => {
+      sum.addEventListener('click', e => {
+        e.preventDefault();
+        const item = sum.parentElement;
+        const willOpen = !item.classList.contains('is-open');
+        list.querySelectorAll('details.faq-item').forEach(other => {
+          if (other !== item) closeItem(other);
+        });
+        if (willOpen) openItem(item);
+        else closeItem(item);
+      });
+    });
+  }
+
+  // ---- Animations: Dia Text Reveal, Spell.sh Blur Reveal & Simple Reveal ----
+  function initSpellReveal() {
+    const el = $('about-spell');
+    if (!el) return;
+    let idx = 0;
+    const walk = node => {
+      [...node.childNodes].forEach(ch => {
+        if (ch.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          ch.textContent.split(/(\s+)/).forEach(part => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(part));
+            else {
+              const s = document.createElement('span');
+              s.className = 'spell-word';
+              s.style.transitionDelay = `${idx++ * 22}ms`;
+              s.textContent = part;
+              frag.appendChild(s);
+            }
+          });
+          ch.replaceWith(frag);
+        } else if (ch.nodeType === 1) walk(ch);
+      });
+    };
+    walk(el);
+  }
+
+  const revealObs = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const el = en.target;
+      if (el.id === 'about-spell') el.classList.add('spell-visible');
+      else {
+        el.classList.add('is-visible');
+        if (el.classList.contains('dia-reveal')) {
+          el.addEventListener('animationend', () => el.classList.add('dia-done'), { once: true });
+        }
+      }
+      revealObs.unobserve(el);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' }) : null;
+
+  function observeReveals() {
+    const targets = document.querySelectorAll('.reveal, .dia-reveal, #about-spell');
+    if (!revealObs) {
+      targets.forEach(el => el.classList.add(el.id === 'about-spell' ? 'spell-visible' : 'is-visible'));
+      return;
+    }
+    targets.forEach(el => {
+      if (el.classList.contains('is-visible') || el.classList.contains('spell-visible')) return;
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight * 0.95 && r.bottom > 0) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (el.id === 'about-spell') el.classList.add('spell-visible');
+          else {
+            el.classList.add('is-visible');
+            if (el.classList.contains('dia-reveal')) {
+              el.addEventListener('animationend', () => el.classList.add('dia-done'), { once: true });
+            }
+          }
+        }));
+      } else revealObs.observe(el);
+    });
+  }
+
+  function setLanguage(lang) {
+    curLang = lang === 'en' ? 'en' : 'id';
+    localStorage.setItem('traverent_lang', curLang);
+    document.documentElement.lang = curLang;
+    const d = I18N[curLang];
+    document.title = d.page_title;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.dataset.i18n;
+      if (d[k]) el.textContent = d[k];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const k = el.dataset.i18nHtml;
+      if (d[k]) el.innerHTML = d[k];
+    });
+    if ($('q')) $('q').placeholder = d.search_ph;
+    const btnId = $('lang-id'), btnEn = $('lang-en');
+    if (btnId && btnEn) {
+      if (curLang === 'en') {
+        btnEn.className = 'rounded px-2 py-0.5 transition-colors bg-white font-semibold text-neutral-900 shadow-sm';
+        btnId.className = 'rounded px-2 py-0.5 transition-colors text-neutral-500 hover:text-neutral-900';
+      } else {
+        btnId.className = 'rounded px-2 py-0.5 transition-colors bg-white font-semibold text-neutral-900 shadow-sm';
+        btnEn.className = 'rounded px-2 py-0.5 transition-colors text-neutral-500 hover:text-neutral-900';
+      }
+    }
+    renderBenefits();
+    renderFields();
+    sync();
+    render();
+    renderReviews();
+    renderBlog();
+    renderFaq();
+    initSpellReveal();
+    observeReveals();
+    if (cur) draw();
+  }
+
+  // Language switcher events
+  $('lang-id').onclick = () => setLanguage('id');
+  $('lang-en').onclick = () => setLanguage('en');
+  setLanguage(curLang);
+</script>
+</body>
+</html>

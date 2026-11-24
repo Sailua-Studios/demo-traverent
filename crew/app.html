@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kru | Traverent Bandung</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="../image/favico.png" type="image/png">
+<link rel="apple-touch-icon" href="../image/favico.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } }
+</script>
+<style>
+  html, body { background: #ffffff; -webkit-tap-highlight-color: transparent; }
+  body { overscroll-behavior-y: none; }
+  button:active, a:active { transform: scale(.98); }
+  button, a { transition: background-color .15s ease, color .15s ease, transform .15s ease; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  @keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes crew-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
+  .sheet { animation: sheet-up .2s ease-out; }
+  #app > * { animation: crew-in .25s cubic-bezier(.22,1,.36,1) both; }
+  #toast:not(.hidden) { animation: toast-in .2s cubic-bezier(.22,1,.36,1) both; }
+  @media (prefers-reduced-motion: reduce) { .sheet, #app > *, #toast:not(.hidden) { animation: none; } button:active, a:active { transform: none; } button, a { transition: none; } }
+</style>
+<!-- Radius: hanya rounded-md (6px); rounded-full khusus avatar & dot indikator -->
+</head>
+<body class="bg-white font-sans text-neutral-900 antialiased">
+<div id="app" class="mx-auto min-h-screen max-w-md bg-white"></div>
+<div id="overlay"></div>
+<div id="toast" class="pointer-events-none fixed inset-x-0 bottom-28 z-[70] mx-auto hidden w-fit max-w-[85%] rounded-md bg-neutral-900 px-4 py-2.5 text-xs font-medium text-white"></div>
+
+<script src="../demo-store.js"></script>
+<script>
+  // Demo mode: no auth check — always show the app
+  const $ = id => document.getElementById(id), pad = n => String(n).padStart(2, '0');
+  const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const dt = (off, t) => { const d = new Date(today); d.setDate(d.getDate() + off); d.setHours(+t.slice(0, 2), +t.slice(3)); return d; };
+  const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const dayDiff = d => Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - today) / 864e5);
+  const fdShort = d => { const n = dayDiff(d); return n === 0 ? 'Hari ini' : n === 1 ? 'Besok' : n === -1 ? 'Kemarin' : `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()].slice(0, 3)}`; };
+  const fdLong = d => `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+  const rp = n => 'Rp ' + n.toLocaleString('id-ID');
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const waNum = n => { const d = String(n).replace(/\D/g, ''); return d.startsWith('0') ? '62' + d.slice(1) : d; };
+
+  // ---------- Ikon ----------
+  const P = {
+    back: '<path d="M15 5l-7 7 7 7"/>', close: '<path d="M6 6l12 12M18 6L6 18"/>', plus: '<path d="M12 5v14M5 12h14"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', pin: '<path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+    user: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>', info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+    cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>', check: '<path d="M5 12l5 5L20 7"/>',
+    expand: '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>', nav: '<path d="M12 3l7 17-7-4-7 4z"/>',
+    money: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>', bike: '<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-3-8h-3M14 9h3l1 8"/>',
+    list: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>', phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>', img: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5-8 8"/>'
+  };
+  const ico = (n, c = 'h-4 w-4', sw = 1.8) => `<svg class="${c}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">${P[n]}</svg>`;
+  const WA = '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.200-1.400A10 10 0 1 0 12 2zm5.500 12.400c-.3-.1-1.700-.8-1.900-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.100-.2.200-.3.200-.6.100-.3-.1-1.200-.4-2.300-1.400-.8-.7-1.400-1.700-1.600-2-.2-.3 0-.4.100-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.600-.9-2.200-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.500s1.100 2.900 1.200 3.100c.1.2 2.100 3.200 5.100 4.500.7.3 1.300.5 1.700.6.7.2 1.400.2 1.900.1.600-.1 1.700-.7 1.900-1.400.2-.7.2-1.300.2-1.400-.1-.1-.3-.2-.6-.3z"/></svg>';
+
+  // ---------- Data dummy ----------
+  const CREW = ['Asep Saepudin', 'Dimas Prakoso', 'Rian Hidayat'];
+  const mkT = (id, tipe, order, nama, wa, unit, plat, alamat, ll, at, crew, sisa = 0, done = false) => ({ id, tipe, order, nama, wa, unit, plat, alamat, lat: ll[0], lng: ll[1], at, crew, sisa, done });
+  const TASKS = [
+    mkT('T1', 'Antar', 'ORD-29090', 'Budi Santoso', '081234567890', 'Honda Beat Street', 'D 7788 AFJ', 'Homestay Lembang Asri, Jl. Raya Lembang No. 101, Lembang', [-6.8120, 107.6178], dt(0, '13:00'), 'Dimas Prakoso'),
+    mkT('T3', 'Jemput', 'ORD-29080', 'Hendra Kusuma', '081234567880', 'Honda Vario 125', 'D 5120 ACF', 'Hotel Pasteur Inn, Jl. Dr. Djundjunan No. 7, Bandung', [-6.8895, 107.5953], dt(0, '17:00'), 'Dimas Prakoso', 420000),
+    mkT('T2', 'Antar', 'ORD-29098', 'Andre Wijaya', '081234567898', 'Yamaha Gear 125', 'D 3344 ADG', 'Hotel Dago Suites, Jl. Ir. H. Juanda No. 45, Bandung', [-6.8847, 107.6131], dt(1, '10:00'), 'Dimas Prakoso'),
+    mkT('T6', 'Jemput', 'ORD-29090', 'Budi Santoso', '081234567890', 'Honda Beat Street', 'D 7788 AFJ', 'Homestay Lembang Asri, Jl. Raya Lembang No. 101, Lembang', [-6.8120, 107.6178], dt(2, '13:00'), 'Dimas Prakoso', 180000),
+    mkT('T5', 'Antar', 'ORD-29072', 'Rina Marlina', '081234567872', 'Honda Scoopy', 'D 6677 AEH', 'Apartemen Taman Sari, Jl. Taman Sari No. 20, Bandung', [-6.8940, 107.6090], dt(-1, '09:00'), 'Dimas Prakoso', 0, true),
+    mkT('T4', 'Antar', 'ORD-29087', 'Maya Putri', '081234567887', 'Honda Vario 160', 'D 8899 AGK', 'Apartemen Taman Sari, Jl. Taman Sari No. 20, Bandung', [-6.8940, 107.6090], dt(1, '09:00'), 'Asep Saepudin'),
+    mkT('T7', 'Jemput', 'ORD-29095', 'Dewi Lestari', '081234567895', 'Honda Scoopy', 'D 6677 AEH', 'Hotel Pasteur Inn, Jl. Dr. Djundjunan No. 7, Bandung', [-6.8895, 107.5953], dt(1, '19:00'), 'Rian Hidayat', 250000)
+  ];
+
+  // ---------- State ----------
+  const KEY = 'traverent-kru-v1';
+  let S = { crew: 'Dimas Prakoso', done: {}, bukti: {} };
+  try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Penyimpanan penuh, bukti tidak tersimpan permanen'); } };
+
+  // ---------- Deklarasi PER di sini agar bisa diakses hydrateTasksFromStore ----------
+  const KELENGKAPAN = '2 helm, 2 jas hujan, gembok';
+  const PER = {
+    'ORD-29090': [dt(0, '13:00'), dt(2, '13:00')], 'ORD-29080': [dt(-2, '09:00'), dt(0, '17:00')], 'ORD-29098': [dt(1, '10:00'), dt(3, '16:00')],
+    'ORD-29072': [dt(-1, '09:00'), dt(1, '09:00')], 'ORD-29087': [dt(1, '09:00'), dt(2, '17:00')], 'ORD-29095': [dt(-1, '09:00'), dt(1, '19:00')]
+  };
+
+  function hydrateTasksFromStore() {
+    if (!window.TraverentDemo) return;
+    const st = window.TraverentDemo.load();
+    CREW.length = 0;
+    (st.CREW || []).forEach(c => CREW.push(c.n));
+    if (CREW.length && !CREW.includes(S.crew)) S.crew = CREW[0];
+
+    const plateByOrder = {}, plateByUnit = {};
+    (st.FLEET || []).forEach(u => {
+      if (u.order) plateByOrder[u.order] = u.plat;
+      if (!plateByUnit[u.n]) plateByUnit[u.n] = u.plat;
+    });
+    const paidSum = oid => (st.TRX || []).filter(x => x.id === oid && x.s !== 'Menunggu verifikasi').reduce((a, x) => a + x.a, 0);
+
+    const list = [];
+    (st.ORDERS || []).forEach(o => {
+      const plat = plateByOrder[o.id] || plateByUnit[o.unit] || 'D 0000 TRV';
+      const oS = new Date(o.s), oE = new Date(o.e);
+      PER[o.id] = [oS, oE];
+      if (o.crew && ['assigned', 'notified', 'return_due', 'return_assigned', 'return_notified', 'settled'].includes(o.st)) {
+        const tid = 'A-' + o.id;
+        list.push({
+          id: tid, tipe: 'Antar', order: o.id, nama: o.nama, wa: o.wa, unit: o.unit, plat,
+          alamat: o.alamat, lat: o.lat || -6.9175, lng: o.lng || 107.6191, at: oS, crew: o.crew,
+          sisa: 0, done: !!(S.done[tid] || ['return_due', 'return_assigned', 'return_notified', 'settled'].includes(o.st))
+        });
+      }
+      if (o.rcrew && ['return_assigned', 'return_notified', 'settled'].includes(o.st)) {
+        const tid = 'J-' + o.id;
+        const tot = window.TraverentDemo.calcTotal(o, st.RATES);
+        const sisa = Math.max(0, tot - paidSum(o.id));
+        list.push({
+          id: tid, tipe: 'Jemput', order: o.id, nama: o.nama, wa: o.wa, unit: o.unit, plat,
+          alamat: o.alamat, lat: o.lat || -6.9175, lng: o.lng || 107.6191, at: oE, crew: o.rcrew,
+          sisa, done: !!(S.done[tid] || o.st === 'settled')
+        });
+      }
+    });
+
+    (st.STATIC_TASKS || []).forEach(t => {
+      if (!list.some(x => x.id === t.id || (x.order === t.order && x.tipe === t.tipe))) {
+        list.push(Object.assign({}, t, { at: new Date(t.at), done: !!(t.done || S.done[t.id]) }));
+      }
+    });
+
+    TASKS.length = 0;
+    list.forEach(t => TASKS.push(t));
+  }
+
+  function syncTaskDoneToStore(t) {
+    if (!window.TraverentDemo) return;
+    const st = window.TraverentDemo.load();
+    const o = (st.ORDERS || []).find(x => x.id === t.order);
+    if (o) {
+      const now = new Date(), hmNow = pad(now.getHours()) + ':' + pad(now.getMinutes());
+      o.log = o.log || [];
+      if (t.tipe === 'Antar') {
+        if (o.st === 'assigned') o.st = 'notified';
+        o.log.push({ t: hmNow, x: `Kru ${t.crew} mengonfirmasi motor sudah diantar ke penyewa` });
+      } else {
+        if (t.sisa > 0 && o.st !== 'settled') {
+          st.TRX.push({ d: 0, id: o.id, n: o.nama, k: 'Pelunasan', a: t.sisa, s: 'Lunas' });
+        }
+        o.docs = o.docs || [];
+        (S.bukti[t.id] || []).forEach(src => {
+          o.docs.push({ l: 'Bukti pelunasan', s: src, by: 'Kru', who: t.crew });
+        });
+        o.st = 'settled';
+        o.log.push({ t: hmNow, x: `Kru ${t.crew} menandai pesanan lunas dan mengunggah bukti pelunasan` });
+      }
+    }
+    const stTask = (st.STATIC_TASKS || []).find(x => x.id === t.id);
+    if (stTask) stTask.done = true;
+    window.TraverentDemo.save(st);
+  }
+
+  hydrateTasksFromStore();
+  TASKS.forEach(t => { if (S.done[t.id]) t.done = true; });
+  const mine = () => TASKS.filter(t => t.crew === S.crew).sort((a, b) => a.at - b.at);
+  const getT = id => TASKS.find(t => t.id === id);
+  const bukti = id => S.bukti[id] || [];
+
+  const uploads = {};
+  const activeUploads = id => uploads[id] || [];
+
+  let htab = 'tugas', dtab = 'info', mapOpen = false, calM = new Date(today.getFullYear(), today.getMonth(), 1), calSel = new Date(today);
+
+  // ---------- Util UI ----------
+  let tt;
+  function toast(msg) { const e = $('toast'); e.textContent = msg; e.classList.remove('hidden'); clearTimeout(tt); tt = setTimeout(() => e.classList.add('hidden'), 2200); }
+  const TIPE = { Antar: 'bg-blue-50 text-blue-900', Jemput: 'bg-violet-50 text-violet-900' };
+  const tipeChip = t => `<span class="inline-block rounded-md px-2 py-0.5 text-[10px] font-medium ${TIPE[t.tipe]}">${t.tipe === 'Antar' ? 'Antar motor' : 'Jemput motor'}</span>`;
+  const statusOf = t => t.done ? ['Selesai', 'bg-emerald-50 text-emerald-900'] : ['Belum dikerjakan', 'bg-amber-50 text-amber-900'];
+  const doneLabel = t => t.tipe === 'Antar' ? 'Motor sudah diantar' : 'Lunas & motor diterima';
+  const avatar = n => `<span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-neutral-200 text-[10px] font-semibold text-neutral-900">${esc(n[0])}</span>`;
+  const segTabs = (items, cur, attr) => `<div class="flex rounded-md bg-neutral-100 p-1 text-xs">${items.map(([k, l, n]) => `<button type="button" ${attr}="${k}" class="flex-1 rounded-md px-3 py-2 font-medium ${cur === k ? 'bg-white text-neutral-900' : 'text-neutral-500'}">${l}${n ? `<span class="ml-1.5 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-900">${n}</span>` : ''}</button>`).join('')}</div>`;
+  const ir = (ic, l, v) => `<div class="mb-1 flex items-center gap-3 rounded-md bg-neutral-50 px-3 py-2"><span class="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-white text-neutral-500">${ico(ic)}</span><span class="text-sm text-neutral-500">${l}</span><span class="ml-auto text-right text-sm font-medium">${v}</span></div>`;
+  const row = (l, v) => `<div class="mb-1 flex justify-between gap-6 rounded-md bg-neutral-50 px-3 py-2 text-sm"><span class="shrink-0 text-neutral-500">${l}</span><span class="text-right font-medium">${v}</span></div>`;
+
+  // ---------- Beranda (Base putih sesuai referensi) ----------
+  const taskCard = t => `<button type="button" data-go="${t.id}" class="block w-full rounded-md bg-white p-3.5 text-left hover:bg-neutral-50/80 ${t.done ? 'opacity-75' : ''}">
+    <div class="flex items-center justify-between text-[11px] text-neutral-500"><span>Order: <span class="font-medium text-neutral-800">${t.order}</span></span>${tipeChip(t)}</div>
+    <h3 class="mt-2 text-sm font-semibold tracking-tight text-neutral-900">${esc(t.unit)}</h3>
+    <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
+      <span class="inline-flex items-center gap-1.5 rounded-md bg-neutral-100 py-0.5 pl-1 pr-2 text-xs text-neutral-700">${avatar(t.nama)}${esc(t.nama)}</span>
+      <span class="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-900">${esc(t.plat)}</span>
+      ${t.tipe === 'Jemput' ? `<span class="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-900">Tagih ${rp(t.sisa)}</span>` : ''}
+    </div>
+    <div class="mt-3 flex items-center justify-between gap-3 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500">
+      <span class="flex min-w-0 items-center gap-1.5">${ico('pin', 'h-3.5 w-3.5 shrink-0')}<span class="truncate">${esc(t.alamat)}</span></span>
+      <span class="flex shrink-0 items-center gap-1.5 font-medium text-neutral-700">${ico('clock', 'h-3.5 w-3.5')}${fdShort(t.at)}, ${hm(t.at)}</span>
+    </div>
+  </button>`;
+
+  const section = (title, dot, items, empty) => `<div class="mt-5 rounded-md bg-neutral-50 p-3">
+    <div class="mb-2.5 flex items-center justify-between px-1 text-xs font-medium">
+      <span class="flex items-center gap-2"><span class="h-2 w-2 rounded-full ${dot}"></span><span class="text-neutral-900">${title}</span></span>
+      <span class="text-neutral-400">${items.length}</span>
+    </div>
+    <div class="space-y-2">${items.map(taskCard).join('') || `<p class="rounded-md bg-white px-4 py-6 text-center text-xs text-neutral-500">${empty}</p>`}</div>
+  </div>`;
+
+  function viewTugas() {
+    const L = mine();
+    return section('Perlu dikerjakan', 'bg-amber-500', L.filter(t => !t.done), 'Tidak ada tugas. Admin akan menugaskan order baru di sini.')
+      + section('Selesai', 'bg-emerald-500', L.filter(t => t.done), 'Belum ada tugas selesai.');
+  }
+
+  function viewKalender() {
+    const y = calM.getFullYear(), m = calM.getMonth(), lead = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate(), L = mine();
+    let cells = '<div class="h-11 rounded-md bg-neutral-100/60"></div>'.repeat(lead);
+    for (let d = 1; d <= n; d++) {
+      const dd = new Date(y, m, d), has = L.filter(t => sameDay(t.at, dd)), sel = sameDay(dd, calSel), td = sameDay(dd, today);
+      cells += `<button type="button" data-day="${y}-${m}-${d}" class="flex h-11 flex-col items-center justify-center rounded-md text-xs ${sel ? 'bg-blue-600 font-semibold text-white' : td ? 'bg-neutral-200/80 font-semibold text-neutral-900' : 'bg-white text-neutral-700 hover:bg-neutral-100'}">${d}<span class="mt-0.5 flex h-1 gap-0.5">${has.slice(0, 3).map(t => `<i class="h-1 w-1 rounded-full ${sel ? 'bg-white' : t.tipe === 'Antar' ? 'bg-blue-500' : 'bg-violet-500'}"></i>`).join('')}</span></button>`;
+    }
+    const filler = '<div class="h-11 rounded-md bg-neutral-100/60"></div>'.repeat((7 - (lead + n) % 7) % 7);
+    const day = L.filter(t => sameDay(t.at, calSel));
+    return `<div class="mt-5 rounded-md bg-neutral-50 p-3">
+      <div class="mb-3 flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <button type="button" data-cal="-1" aria-label="Bulan sebelumnya" class="rounded-md bg-white px-3 py-1.5 text-xs hover:bg-neutral-100">‹</button>
+          <span class="min-w-[120px] text-center text-sm font-semibold">${BULAN[m]} ${y}</span>
+          <button type="button" data-cal="1" aria-label="Bulan berikutnya" class="rounded-md bg-white px-3 py-1.5 text-xs hover:bg-neutral-100">›</button>
+        </div>
+        <button type="button" data-cal="0" class="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">Hari ini</button>
+      </div>
+      <div class="mb-1 grid grid-cols-7 text-center text-[11px] text-neutral-500">${['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(h => `<span class="py-1">${h}</span>`).join('')}</div>
+      <div class="grid grid-cols-7 gap-1 text-center">${cells}${filler}</div>
+      <div class="mt-2.5 flex gap-3 rounded-md bg-white px-3 py-2 text-[11px] text-neutral-600">
+        <span class="inline-flex items-center gap-1.5"><i class="h-1.5 w-1.5 rounded-full bg-blue-500"></i>Antar</span>
+        <span class="inline-flex items-center gap-1.5"><i class="h-1.5 w-1.5 rounded-full bg-violet-500"></i>Jemput</span>
+      </div>
+    </div>
+    <div class="mt-4 rounded-md bg-neutral-50 p-3">
+      <h2 class="mb-2.5 px-1 text-xs font-semibold">${fdLong(calSel)}</h2>
+      <div class="space-y-2">${day.map(taskCard).join('') || '<p class="rounded-md bg-white px-4 py-6 text-center text-xs text-neutral-500">Tidak ada tugas di tanggal ini.</p>'}</div>
+    </div>`;
+  }
+
+  function viewUnit() {
+    const by = {}; mine().forEach(t => (by[t.plat] = by[t.plat] || []).push(t));
+    const rows = Object.entries(by).map(([plat, ts]) => {
+      const nx = ts.find(t => !t.done), last = ts[ts.length - 1];
+      const st = nx ? (nx.tipe === 'Antar' ? ['Perlu diantar', 'bg-blue-50 text-blue-900'] : ['Perlu dijemput', 'bg-violet-50 text-violet-900']) : last.tipe === 'Jemput' ? ['Sudah kembali', 'bg-green-50 text-green-900'] : ['Sedang disewa', 'bg-amber-50 text-amber-900'];
+      return `<article class="space-y-1.5 rounded-md bg-neutral-50 p-2.5">
+        <div class="flex items-center gap-3 rounded-md bg-white p-3">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-neutral-100 text-neutral-700">${ico('bike', 'h-5 w-5')}</span>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-2"><h3 class="text-sm font-semibold">${esc(ts[0].unit)}</h3><span class="shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium ${st[1]}">${st[0]}</span></div>
+            <p class="mt-0.5 text-xs text-neutral-500">${esc(plat)}</p>
+          </div>
+        </div>
+        <div class="space-y-1.5 text-xs">${ts.map(t => `<button type="button" data-go="${t.id}" class="flex w-full items-center justify-between rounded-md bg-white px-3 py-2.5 text-left hover:bg-neutral-50"><span><b class="font-medium">${t.tipe}</b> · ${t.order} · ${esc(t.nama)}</span><span class="text-neutral-400">${fdShort(t.at)}</span></button>`).join('')}</div>
+      </article>`;
+    });
+    return `<div class="mt-5 space-y-3">${rows.join('') || '<div class="rounded-md bg-neutral-50 p-3"><p class="rounded-md bg-white px-4 py-6 text-center text-xs text-neutral-500">Belum ada unit yang terkait tugasmu.</p></div>'}</div>`;
+  }
+
+  function viewHome() {
+    const n = mine().filter(t => !t.done).length;
+    return `
+      <div class="px-5 pb-12 pt-7">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[26px] font-normal leading-tight tracking-tight text-neutral-400">Halo, kru Traverent</p>
+            <h1 class="mt-0.5 text-[28px] font-semibold leading-tight tracking-tight text-neutral-900">${esc(S.crew)}</h1>
+          </div>
+          <label class="shrink-0 text-right text-[10px] text-neutral-400">Demo kru
+            <select id="crew-sel" class="mt-0.5 block rounded-md bg-neutral-100 px-2 py-1 text-[11px] font-medium text-neutral-700 outline-none focus:bg-neutral-200/70">${CREW.map(c => `<option ${c === S.crew ? 'selected' : ''}>${c}</option>`).join('')}</select>
+          </label>
+        </div>
+        <div class="mt-5">${segTabs([['tugas', 'Tugas', n], ['kalender', 'Kalender'], ['unit', 'Unit Motor']], htab, 'data-htab')}</div>
+        ${htab === 'tugas' ? viewTugas() : htab === 'kalender' ? viewKalender() : viewUnit()}
+      </div>`;
+  }
+
+
+  function paneInfo(t) {
+    const p = PER[t.order], w = d => `${fdShort(d)}, ${hm(d)}`, antar = t.tipe === 'Antar';
+    return `<div class="rounded-md bg-white p-3">
+        ${row('WhatsApp', esc(t.wa))}
+        ${row('Plat nomor', esc(t.plat))}
+        ${p ? row('Mulai sewa', w(p[0])) + row('Jadwal kembali', w(p[1])) : ''}
+        ${row('Kelengkapan', KELENGKAPAN)}
+        ${row(antar ? 'Alamat antar' : 'Alamat jemput', esc(t.alamat))}
+      </div>
+      ${antar ? '' : `<div class="mt-2 flex items-center justify-between rounded-md bg-amber-50 px-4 py-3 text-xs text-amber-900"><span class="flex items-center gap-2 font-medium">${ico('money', 'h-4 w-4')}Sisa pembayaran</span><b class="text-sm">${rp(t.sisa)}</b></div>`}
+      <p class="mt-2 rounded-md bg-blue-50 px-4 py-3 text-xs leading-relaxed text-blue-900">${antar ? 'Penyewa wajib menunjukkan KTP asli saat serah terima.' : 'Pelunasan diterima langsung dari penyewa. Bukti pembayaran diunggah di tab Upload bukti.'}</p>`;
+  }
+
+  // Google Maps embed — free, no API key required
+  const mapSrc = (t, z = 15) => `https://maps.google.com/maps?q=${t.lat},${t.lng}&z=${z}&output=embed&hl=id`;
+  const gmaps = t => `https://www.google.com/maps/dir/?api=1&destination=${t.lat},${t.lng}`;
+
+  function paneLokasi(t) {
+    return `<div class="rounded-md bg-white p-3">
+      <div class="relative overflow-hidden rounded-md bg-neutral-100">
+        <iframe title="Peta lokasi" loading="lazy" src="${mapSrc(t)}" class="h-60 w-full border-0"></iframe>
+        <button type="button" data-map="1" aria-label="Layar penuh" class="absolute bottom-2.5 right-2.5 grid h-9 w-9 place-items-center rounded-md bg-white text-neutral-700 hover:bg-neutral-100">${ico('expand', 'h-4 w-4')}</button>
+      </div>
+      <div class="mt-3">
+        <p class="text-xs text-neutral-500">${t.tipe === 'Antar' ? 'Alamat antar' : 'Alamat jemput'}</p>
+        <p class="mt-1 text-sm font-semibold leading-relaxed">${esc(t.alamat)}</p>
+        <div class="mt-3">
+          ${row('Customer', esc(t.nama))}
+          ${row('Koordinat', `${t.lat.toFixed(4)}, ${t.lng.toFixed(4)}`)}
+        </div>
+        <a href="${gmaps(t)}" target="_blank" rel="noopener" class="mt-2 flex items-center justify-center gap-2 rounded-md bg-neutral-100 py-2.5 text-xs font-medium text-neutral-900 hover:bg-neutral-200">${ico('nav', 'h-3.5 w-3.5')}Buka menggunakan Google Maps</a>
+      </div>
+    </div>`;
+  }
+
+  // ---------- Kartu Progress Upload Gambar ----------
+  const uploadProgressCard = u => `
+    <div class="relative overflow-hidden rounded-md bg-neutral-200/80 px-4 pt-4 pb-0">
+      <div class="relative overflow-hidden rounded-t-md bg-white">
+        <img src="${u.preview}" alt="Mengunggah bukti" class="h-44 w-full object-cover">
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent"></div>
+      </div>
+      <div data-up-pct="${u.id}" class="pointer-events-none absolute inset-x-0 bottom-3.5 text-center text-lg font-bold tracking-tight text-neutral-900 tabular-nums">${u.pct}%</div>
+      <div class="absolute inset-x-0 bottom-0 h-1.5 bg-neutral-300/60">
+        <div data-up-bar="${u.id}" class="h-full rounded-r-md bg-neutral-900 transition-all duration-150 ease-out" style="width:${u.pct}%"></div>
+      </div>
+    </div>`;
+
+  function paneBukti(t) {
+    if (t.tipe === 'Antar') return `<div class="flex flex-col items-center rounded-md bg-white px-6 py-10 text-center">${stackIll()}<h3 class="mt-5 text-sm font-semibold">Tidak perlu bukti</h3><p class="mt-1 text-xs text-neutral-500">Upload bukti hanya dipakai saat menjemput motor, untuk bukti pelunasan dari customer.</p></div>`;
+    const B = bukti(t.id), U = activeUploads(t.id);
+    if (!B.length && !U.length) return `<div class="flex flex-col items-center rounded-md bg-white px-6 py-8 text-center">${stackIll()}<h3 class="mt-5 text-sm font-semibold">Belum ada bukti pelunasan</h3><p class="mt-1 text-xs text-neutral-500">Foto bukti transfer atau bukti pembayaran dari customer sebesar ${rp(t.sisa)}.</p>
+      ${t.done ? '' : `<button type="button" data-upload="1" class="mt-4 flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-xs font-medium text-white hover:bg-blue-700">${ico('plus', 'h-4 w-4')}Upload bukti</button>`}</div>`;
+    const upHtml = U.length ? `<div class="space-y-2 ${B.length ? 'mb-2' : ''}">${U.map(uploadProgressCard).join('')}</div>` : '';
+    const doneHtml = B.length ? `<div class="rounded-md bg-white p-4"><div class="flex items-center justify-between"><h3 class="text-sm font-semibold">Bukti pelunasan (${B.length})</h3><span class="rounded-md bg-violet-50 px-2 py-0.5 text-[10px] font-medium text-violet-900">Diunggah kru</span></div>
+      <div class="mt-3 grid grid-cols-3 gap-2">${B.map((s, i) => `<div class="relative"><img src="${s}" alt="Bukti ${i + 1}" class="h-24 w-full rounded-md object-cover">${t.done ? '' : `<button type="button" data-delb="${i}" aria-label="Hapus bukti" class="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-md bg-red-600 text-white hover:bg-red-700">${ico('close', 'h-3 w-3', 2.5)}</button>`}</div>`).join('')}
+        ${t.done ? '' : `<button type="button" data-upload="1" class="grid h-24 place-items-center rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200">${ico('plus', 'h-5 w-5')}</button>`}</div></div>` : '';
+    return upHtml + doneHtml;
+  }
+  const stackIll = () => `<div class="relative h-28 w-36"><div class="absolute left-0 top-5 h-22 w-20 -rotate-6 rounded-md bg-neutral-100"></div><div class="absolute right-0 top-5 h-22 w-20 rotate-6 rounded-md bg-neutral-100"></div><div class="relative mx-auto grid h-24 w-20 place-items-center rounded-md bg-neutral-100 text-neutral-400">${ico('img', 'h-7 w-7')}</div></div>`;
+
+  function viewDetail(t) {
+    const st = statusOf(t), nb = bukti(t.id).length, uploading = activeUploads(t.id).length > 0;
+    const main = t.done ? `<button type="button" disabled class="flex h-11 flex-1 items-center justify-center gap-2 rounded-md bg-neutral-200 px-4 text-xs font-medium text-neutral-500">${ico('check', 'h-4 w-4', 2.2)}${doneLabel(t)}</button>`
+      : uploading ? `<button type="button" disabled class="flex h-11 flex-1 items-center justify-center gap-2 rounded-md bg-neutral-200 px-4 text-xs font-medium text-neutral-500">Mengunggah bukti...</button>`
+      : `<button type="button" data-main="1" class="flex h-11 flex-1 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-xs font-medium text-white hover:bg-blue-700">${t.tipe === 'Antar' ? 'Motor sudah sampai di customer' : 'Konfirmasi lunas & selesai'}${ico('check', 'h-4 w-4', 2.2)}</button>`;
+    return `<div class="px-5 pb-28 pt-5">
+      <div class="flex items-center justify-between">
+        <button type="button" data-back="1" aria-label="Kembali" class="grid h-9 w-9 place-items-center rounded-md bg-neutral-100 text-neutral-700 hover:bg-neutral-200">${ico('back', 'h-4 w-4')}</button>
+        <span class="rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600">#${t.order}</span>
+      </div>
+      <h1 class="mt-4 text-3xl font-medium tracking-tight">${esc(t.unit)}</h1>
+      <p class="mt-1 text-xs text-neutral-500">${t.tipe === 'Antar' ? 'Pengantaran unit motor ke lokasi penyewa.' : 'Pengambilan unit motor & pelunasan dari penyewa.'}</p>
+      <div class="mt-4">
+        ${ir('info', 'Status', `<span class="inline-block rounded-md px-2 py-0.5 text-[10px] font-medium ${st[1]}">${st[0]}</span>`)}
+        ${ir('bike', 'Tugas', tipeChip(t))}
+        ${ir('cal', 'Jadwal', `${fdShort(t.at)}, ${hm(t.at)}`)}
+        ${ir('user', 'Customer', `<span class="inline-flex items-center gap-2">${avatar(t.nama)}${esc(t.nama)}</span>`)}
+      </div>
+
+      <div class="mt-4 rounded-md bg-neutral-50 p-3">
+        <div class="mb-3 flex rounded-md bg-neutral-200/70 p-1 text-xs">${[['info', 'Informasi'], ['lokasi', 'Lokasi'], ['bukti', 'Upload bukti', t.tipe === 'Jemput' && nb ? nb : 0]].map(([k, l, n]) => `<button type="button" data-dtab="${k}" class="flex-1 rounded-md px-3 py-2 font-medium ${dtab === k ? 'bg-white text-neutral-900' : 'text-neutral-500'}">${l}${n ? `<span class="ml-1.5 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-900">${n}</span>` : ''}</button>`).join('')}</div>
+        ${dtab === 'info' ? paneInfo(t) : dtab === 'lokasi' ? paneLokasi(t) : paneBukti(t)}
+      </div>
+    </div>
+    <div class="fixed inset-x-0 bottom-0 z-30"><div class="mx-auto flex max-w-md items-center gap-2 bg-white/95 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2.5 backdrop-blur">
+      <a href="https://wa.me/${waNum(t.wa)}" target="_blank" rel="noopener" aria-label="Hubungi customer via WhatsApp" class="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-neutral-100 text-[#25D366] hover:bg-neutral-200/70">${WA}</a>${main}
+    </div></div>`;
+  }
+
+  // ---------- Layar penuh peta & Modal konfirmasi ----------
+  function fullMap(t) {
+    return `<div class="fixed inset-0 z-50 bg-neutral-200"><iframe title="Peta layar penuh" src="${mapSrc(t, 16)}" class="absolute inset-0 h-full w-full border-0"></iframe>
+      <div class="absolute inset-x-0 top-0 mx-auto max-w-md p-3">
+        <div class="flex items-center justify-between rounded-md bg-white p-3.5">
+          <div><h2 class="text-sm font-semibold">${t.tipe === 'Antar' ? 'Antar' : 'Jemput'} · ${esc(t.nama)}</h2><p class="text-xs text-neutral-500">${fdLong(t.at)}</p></div>
+          <button type="button" data-map="0" aria-label="Tutup peta" class="grid h-8 w-8 place-items-center rounded-md bg-neutral-100 text-neutral-600 hover:bg-neutral-200">${ico('close', 'h-4 w-4')}</button>
+        </div>
+      </div>
+      <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div class="rounded-md bg-white p-4">
+          <p class="text-xs text-neutral-500">Alamat lengkap</p>
+          <p class="mt-1 text-sm font-semibold leading-relaxed">${esc(t.alamat)}</p>
+          <a href="${gmaps(t)}" target="_blank" rel="noopener" class="mt-3 flex items-center justify-center gap-2 rounded-md bg-blue-600 py-2.5 text-xs font-medium text-white hover:bg-blue-700">${ico('nav', 'h-3.5 w-3.5')}Buka menggunakan Google Maps</a>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function confirmSheet(t) {
+    const msg = t.tipe === 'Antar' ? `Pastikan motor <b>${esc(t.unit)}</b> sudah diserahkan ke <b>${esc(t.nama)}</b>. Status order akan diperbarui untuk admin.` : `Pastikan pelunasan <b>${rp(t.sisa)}</b> sudah diterima dan motor <b>${esc(t.unit)}</b> sudah kamu ambil. Admin akan melihat status lunas dan bukti yang kamu unggah.`;
+    $('overlay').innerHTML = `<div class="fixed inset-0 z-[60] flex items-end justify-center bg-neutral-900/40 p-3 sm:items-center" data-sheet-close="1">
+      <div class="sheet w-full max-w-md overflow-hidden rounded-md bg-white">
+        <div class="flex items-center justify-between px-5 py-4">
+          <h3 class="text-base font-semibold">${t.tipe === 'Antar' ? 'Motor sudah sampai?' : 'Konfirmasi lunas & selesai?'}</h3>
+          <button type="button" data-sheet-close="1" aria-label="Tutup" class="grid h-8 w-8 place-items-center rounded-md text-neutral-500 hover:bg-neutral-100">${ico('close', 'h-4 w-4')}</button>
+        </div>
+        <div class="px-5 pb-4 text-sm leading-relaxed text-neutral-600">${msg}</div>
+        <div class="flex items-center justify-end gap-2 px-5 py-4">
+          <button type="button" data-sheet-close="1" class="rounded-md bg-neutral-100 px-5 py-2.5 text-xs font-medium hover:bg-neutral-200">Batal</button>
+          <button type="button" data-confirm="${t.id}" class="rounded-md bg-blue-600 px-5 py-2.5 text-xs font-medium text-white hover:bg-blue-700">Ya, update status</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  const closeSheet = () => { $('overlay').innerHTML = ''; };
+
+  // ---------- Router ----------
+  function render() {
+    const m = location.hash.match(/^#\/t\/([\w-]+)/), t = m && getT(m[1]);
+    $('app').innerHTML = t ? viewDetail(t) : viewHome();
+    if (!t) mapOpen = false;
+    if (mapOpen && t) { $('overlay').innerHTML = fullMap(t); } else if (!$('overlay').querySelector('[data-confirm]')) { $('overlay').innerHTML = ''; }
+  }
+  addEventListener('hashchange', () => { dtab = 'info'; mapOpen = false; closeSheet(); render(); scrollTo(0, 0); });
+
+  // ---------- Upload bukti dengan progress bar ----------
+  function setUploadPct(taskId, item, pct) {
+    item.pct = Math.min(100, Math.max(0, Math.round(pct)));
+    const pctEl = document.querySelector(`[data-up-pct="${item.id}"]`);
+    const barEl = document.querySelector(`[data-up-bar="${item.id}"]`);
+    if (pctEl) pctEl.textContent = item.pct + '%';
+    if (barEl) barEl.style.width = item.pct + '%';
+  }
+  function removeUploadItem(taskId, itemId, url) {
+    URL.revokeObjectURL(url);
+    if (uploads[taskId]) {
+      uploads[taskId] = uploads[taskId].filter(x => x.id !== itemId);
+      if (!uploads[taskId].length) delete uploads[taskId];
+    }
+  }
+
+  const fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'image/*'; fileIn.multiple = true; fileIn.className = 'hidden'; document.body.appendChild(fileIn);
+  fileIn.onchange = () => {
+    const t = getT(location.hash.slice(4)); if (!t) return;
+    const taskId = t.id;
+    [...fileIn.files].forEach((f, idx) => {
+      const url = URL.createObjectURL(f);
+      const item = { id: 'up-' + Date.now() + '-' + idx + '-' + Math.random().toString(36).slice(2, 6), preview: url, pct: 0 };
+      (uploads[taskId] = uploads[taskId] || []).push(item);
+      render();
+
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, 900 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = img.width * k; c.height = img.height * k;
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        const dataUrl = c.toDataURL('image/jpeg', .72);
+
+        const steps = [24, 48, 60, 84, 100];
+        let stepIdx = 0;
+        const timer = setInterval(() => {
+          setUploadPct(taskId, item, steps[stepIdx]);
+          stepIdx++;
+          if (stepIdx >= steps.length) {
+            clearInterval(timer);
+            setTimeout(() => {
+              removeUploadItem(taskId, item.id, url);
+              (S.bukti[taskId] = S.bukti[taskId] || []).push(dataUrl);
+              save();
+              toast('Bukti berhasil diunggah');
+              render();
+            }, 220);
+          }
+        }, 140);
+      };
+      img.onerror = () => {
+        removeUploadItem(taskId, item.id, url);
+        toast('File bukan gambar yang valid');
+        render();
+      };
+      img.src = url;
+    });
+    fileIn.value = '';
+  };
+
+  // ---------- Event ----------
+  document.addEventListener('click', e => {
+    const q = s => e.target.closest(s), cur = () => getT(location.hash.slice(4));
+    let x;
+    if (x = q('[data-go]')) { dtab = 'info'; location.hash = '#/t/' + x.dataset.go; return; }
+    if (q('[data-back]')) { location.hash = ''; return; }
+    if (x = q('[data-htab]')) { htab = x.dataset.htab; return render(); }
+    if (x = q('[data-dtab]')) { dtab = x.dataset.dtab; return render(); }
+    if (x = q('[data-cal]')) { const v = +x.dataset.cal; calM = v ? new Date(calM.getFullYear(), calM.getMonth() + v, 1) : new Date(today.getFullYear(), today.getMonth(), 1); return render(); }
+    if (x = q('[data-day]')) { const [y, m, d] = x.dataset.day.split('-').map(Number); calSel = new Date(y, m, d); return render(); }
+    if (x = q('[data-map]')) { mapOpen = x.dataset.map === '1'; return render(); }
+    if (q('[data-upload]')) return fileIn.click();
+    if (x = q('[data-delb]')) { const t = cur(); S.bukti[t.id].splice(+x.dataset.delb, 1); save(); return render(); }
+    if (q('[data-main]')) { const t = cur(); if (t.tipe === 'Jemput' && !bukti(t.id).length) { dtab = 'bukti'; render(); return toast('Upload bukti pelunasan dulu'); } return confirmSheet(t); }
+    if (x = q('[data-confirm]')) { const t = getT(x.dataset.confirm); t.done = true; S.done[t.id] = Date.now(); save(); syncTaskDoneToStore(t); closeSheet(); toast('Status diperbarui, admin akan melihatnya'); return render(); }
+    if (e.target.dataset && e.target.dataset.sheetClose || q('button[data-sheet-close]')) return closeSheet();
+  });
+  document.addEventListener('change', e => { if (e.target.id === 'crew-sel') { S.crew = e.target.value; save(); render(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (mapOpen) { mapOpen = false; render(); } closeSheet(); } });
+
+  render();
+  window.addEventListener('storage', e => { if (e.key === (window.TraverentDemo && window.TraverentDemo.STORE_KEY)) { hydrateTasksFromStore(); render(); } });
+  if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+</script>
+</body>
+</html>
