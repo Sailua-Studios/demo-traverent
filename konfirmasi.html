@@ -18,7 +18,7 @@
 
 <!-- Demo: pindah antar layar. Hapus blok ini di versi asli. -->
 <div class="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white/90 px-4 py-2 text-center text-[11px] text-neutral-500 backdrop-blur">
-  Demo: <a href="?step=dp" class="underline">Upload bukti DP</a> · <a href="?step=return" class="underline">Konfirmasi pengembalian</a>
+  Demo: <a href="?step=dp" class="underline">Upload bukti DP</a> · <a href="?step=status" class="underline">Status pesanan</a> · <a href="?step=return" class="underline">Konfirmasi pengembalian</a>
 </div>
 
 <script src="demo-store.js"></script>
@@ -118,7 +118,25 @@
       </section>`;
   }
 
-  // ---------- Layar 2: konfirmasi pengembalian ----------
+  // ---------- Layar 2: status pesanan customer ----------
+  function statusScreen() {
+    const t = total(o);
+    return `<h1 class="text-4xl font-medium tracking-tight">#${oid}</h1>
+      <p class="mt-2 text-sm text-neutral-500">Status pesanan sewa motor kamu di Traverent Bandung.</p>
+      <div class="mt-6">${summary([
+        ['Penyewa', o.nama], ['Unit', o.unit], ['Periode sewa', `${fd(o.s)} – ${fd(o.e)}`],
+        ['Alamat pengantaran', o.alamat],
+        ['Status DP', 'Diterima & Terverifikasi'],
+        ['Total sewa', rp(t)],
+        ['Status unit', 'Siap diantar sesuai jadwal']
+      ])}</div>
+      <div class="mt-6 rounded-md bg-blue-50 p-4 text-xs leading-relaxed text-blue-900">
+        <p class="font-semibold text-blue-950">Motor siap diantar oleh kru kami</p>
+        <p class="mt-1">Kru Traverent Bandung akan menghubungi via WhatsApp menjelang waktu pengantaran. Pastikan membawa KTP asli saat serah terima unit.</p>
+      </div>`;
+  }
+
+  // ---------- Layar 3: konfirmasi pengembalian ----------
   function returnScreen() {
     if (view === 'done') return done('Terima kasih sudah menyewa di Traverent', 'Pengembalian motor sudah kami catat. Kami akan memeriksa kondisi unit dan menghubungi kamu bila ada hal yang perlu dikonfirmasi.');
     const t = total(o);
@@ -135,7 +153,7 @@
   function render() {
     $('app').innerHTML = !o
       ? `<h1 class="text-2xl font-medium">Order tidak ditemukan</h1><p class="mt-2 text-sm text-neutral-500">Periksa kembali link dari Traverent Bandung atau hubungi admin lewat WhatsApp.</p>`
-      : step === 'return' ? returnScreen() : dpScreen();
+      : step === 'return' ? returnScreen() : step === 'status' ? statusScreen() : dpScreen();
     if (view === 'done') window.scrollTo(0, 0);
   }
 

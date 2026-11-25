@@ -220,32 +220,9 @@
       <p id="agreeErr" data-i18n="agree_err" class="hidden text-[11px] text-red-600">Centang persetujuan untuk melanjutkan.</p>
     </div>
 
-    <!-- STEP 4: PEMBAYARAN DP -->
-    <div data-step="4" class="hidden space-y-5">
-      <div>
-        <h2 data-i18n="s4_title" class="dia-reveal text-3xl font-medium tracking-tight">Pembayaran DP</h2>
-        <p data-i18n="s4_desc" class="reveal mt-2 text-xs text-neutral-500">Transfer DP untuk mengamankan unit, lalu unggah bukti transfernya.</p>
-      </div>
-
-      <div class="rounded-md bg-neutral-50 p-4">
-        <p data-i18n="dp_label" class="text-[11px] text-neutral-500">Nominal DP</p>
-        <p id="dpAmount" class="mt-1 text-3xl font-medium tracking-tight"></p>
-        <dl id="bankInfo" class="mt-4 divide-y divide-neutral-200 border-t border-neutral-200"></dl>
-      </div>
-
-      <div>
-        <span data-i18n="lbl_proof" class="mb-1.5 block text-[11px] text-neutral-500">Bukti Transfer DP</span>
-        <label for="proof" class="flex cursor-pointer flex-col items-center justify-center rounded border border-dashed border-neutral-300 px-4 py-6 text-center hover:bg-neutral-50">
-          <img id="proofPreview" alt="Pratinjau bukti transfer" class="mb-3 hidden max-h-56 rounded">
-          <span id="proofLabel" class="text-xs font-medium">Klik untuk unggah bukti transfer</span>
-          <span data-i18n="file_hint" class="mt-1 text-[11px] text-neutral-400">JPG atau PNG, maks. 5 MB</span>
-        </label>
-        <input id="proof" type="file" accept="image/png,image/jpeg" class="sr-only">
-        <p class="err mt-1 hidden text-[11px] text-red-600"></p>
-      </div>
-
-      <p data-i18n="note_dp" class="w-fit rounded bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-900">Pesanan dikonfirmasi admin setelah bukti transfer diverifikasi.</p>
-    </div>
+    <!-- STEP 4 removed — DP now handled by admin sending payment link -->
+    <!-- Placeholder div kept so step references don't break -->
+    <div data-step="4" class="hidden"></div>
 
     <!-- Actions -->
     <div class="mt-10 flex items-center justify-between">
@@ -346,18 +323,18 @@
       lbl_area: 'Area Tujuan', ph_area: 'Contoh: Lembang, Dago, Kota Bandung',
       lbl_alamat: 'Alamat Hotel / Tempat Tinggal Selama Sewa', ph_alamat: 'Nama hotel atau alamat lengkap',
       note_ktp: 'Penyewaan hanya untuk penyewa dengan KTP di luar Bandung. Alamat ini digunakan untuk keperluan keamanan.',
-      s3_title: 'Review', s3_desc: 'Pastikan semua data sudah benar sebelum melanjutkan ke pembayaran DP.',
+      s3_title: 'Review', s3_desc: 'Pastikan semua data sudah benar sebelum mengirim pesanan untuk diverifikasi admin.',
       agree_text: 'Saya menyatakan data di atas benar dan menyetujui <a href="index.html#faq" class="font-medium underline">Syarat &amp; Ketentuan</a>.',
       agree_err: 'Centang persetujuan untuk melanjutkan.',
       s4_title: 'Pembayaran DP', s4_desc: 'Transfer DP untuk mengamankan unit, lalu unggah bukti transfernya.',
       dp_label: 'Nominal DP', lbl_proof: 'Bukti Transfer DP', proof_upload: 'Klik untuk unggah bukti transfer',
       note_dp: 'Pesanan dikonfirmasi admin setelah bukti transfer diverifikasi.',
-      btn_back: 'Kembali', btn_next: 'Lanjut ', btn_to_pay: 'Lanjut ke Pembayaran ', btn_submit: 'Kirim Pesanan ',
+      btn_back: 'Kembali', btn_next: 'Lanjut ', btn_to_pay: 'Kirim Pesanan ', btn_submit: 'Kirim Pesanan ',
       inv_auto: 'Total dihitung otomatis',
-      ok_title: 'Pesanan Terkirim', ok_desc: 'Kami akan segera menghubungi Anda untuk konfirmasi lebih lanjut.',
+      ok_title: 'Pesanan Terkirim', ok_desc: 'Pesanan Anda sedang diverifikasi admin. Kami akan mengirimkan link pembayaran DP melalui WhatsApp.',
       dlg_title: 'Pilih unit motor<br>untuk sewa Anda', dlg_desc: 'Estimasi total mengikuti tanggal dan waktu sewa yang dipilih.',
       btn_save: 'Simpan', btn_cancel: 'Batal',
-      steps: ['Data Diri', 'Detail Sewa', 'Review', 'Pembayaran DP'],
+      steps: ['Data Diri', 'Detail Sewa', 'Review'],
       lbl_start: 'Tanggal Sewa', lbl_end: 'Tanggal Kembali', lbl_t1: 'Waktu Sewa', lbl_t2: 'Waktu Kembali',
       ph_date: 'Pilih tanggal', ph_time: 'Pilih waktu',
       pick_date_title: 'Pilih Tanggal Sewa', pick_date_btn: 'Pilih Tanggal',
@@ -366,7 +343,7 @@
       rent_hrs: (h, we) => `Sewa ${h} jam (${we ? 'Weekend' : 'Weekday'})`,
       extra_hrs: we => `Extra hours (${we ? 'Weekend' : 'Weekday'})`,
       est_title: 'Estimasi biaya',
-      est_note: dp => `Dihitung otomatis dari unit, tanggal, dan waktu sewa. Rincian lengkap ada di langkah Review. DP ${dp} dibayar di langkah terakhir.`,
+      est_note: () => `Dihitung otomatis dari unit, tanggal, dan waktu sewa. Rincian lengkap ada di langkah Review. Link pembayaran DP dikirim admin via WhatsApp setelah verifikasi.`,
       err_invalid_time: 'Waktu kembali harus setelah waktu sewa.',
       err_incomplete_sch: 'Lengkapi tanggal dan waktu sewa terlebih dahulu.',
       est_empty: 'Pilih tanggal dan waktu sewa.',
@@ -386,8 +363,8 @@
       inv_billed_by: 'Billed by', inv_billed_to: 'Billed to', inv_price: 'Harga', inv_amt: 'Jumlah',
       inv_dp: 'DP (transfer)', inv_rem: 'Sisa pembayaran',
       inv_notes: (max, r1, r2) => `Tarif dihitung otomatis berdasarkan unit, tanggal, dan waktu sewa (dibulatkan per jam). Keterlambatan maksimal ${max} jam dikenakan ${r1}–${r2}/jam, lebih dari itu berlaku tarif normal 12 jam. Total final dikonfirmasi admin.`,
-      ok_order_id: 'Order ID', ok_unit: 'Unit', ok_period: 'Periode sewa', ok_method: 'Metode pembayaran', ok_method_val: 'Transfer Bank (DP)',
-      ok_datetime: 'Tanggal & waktu', ok_dp: 'DP dibayar', ok_total: 'Total sewa'
+      ok_order_id: 'Order ID', ok_unit: 'Unit', ok_period: 'Periode sewa', ok_method: 'Status', ok_method_val: 'Menunggu verifikasi admin',
+      ok_datetime: 'Tanggal & waktu', ok_dp: 'Pembayaran DP', ok_total: 'Estimasi total sewa'
     },
     en: {
       page_title: 'Booking Form | Traverent Bandung',
@@ -403,18 +380,18 @@
       lbl_area: 'Destination Area', ph_area: 'e.g. Lembang, Dago, Bandung City',
       lbl_alamat: 'Hotel / Accommodation Address During Rental', ph_alamat: 'Hotel name or full address',
       note_ktp: 'Rentals are for visitors from outside Bandung. This address is used for security verification.',
-      s3_title: 'Review', s3_desc: 'Make sure all details are correct before proceeding to DP payment.',
+      s3_title: 'Review', s3_desc: 'Make sure all details are correct before submitting your order for admin verification.',
       agree_text: 'I confirm that the above details are accurate and agree to the <a href="index.html#faq" class="font-medium underline">Terms &amp; Conditions</a>.',
       agree_err: 'Please check the agreement box to continue.',
       s4_title: 'DP Payment', s4_desc: 'Transfer the down payment to secure your unit, then upload the transfer receipt.',
       dp_label: 'Down Payment (DP) Amount', lbl_proof: 'DP Transfer Receipt', proof_upload: 'Click to upload transfer receipt',
       note_dp: 'Your booking will be confirmed by our admin after the transfer receipt is verified.',
-      btn_back: 'Back', btn_next: 'Next ', btn_to_pay: 'Proceed to Payment ', btn_submit: 'Submit Order ',
+      btn_back: 'Back', btn_next: 'Next ', btn_to_pay: 'Submit Order ', btn_submit: 'Submit Order ',
       inv_auto: 'Auto-calculated total',
-      ok_title: 'Order Submitted', ok_desc: 'We will contact you shortly for further confirmation.',
+      ok_title: 'Order Submitted', ok_desc: 'Your order is being verified by our admin. We will send the DP payment link via WhatsApp.',
       dlg_title: 'Choose a motorbike<br>for your rental', dlg_desc: 'Estimated total follows your selected rental dates and times.',
       btn_save: 'Save', btn_cancel: 'Cancel',
-      steps: ['Personal Info', 'Rental Details', 'Review', 'DP Payment'],
+      steps: ['Personal Info', 'Rental Details', 'Review'],
       lbl_start: 'Rental Date', lbl_end: 'Return Date', lbl_t1: 'Pickup Time', lbl_t2: 'Return Time',
       ph_date: 'Select date', ph_time: 'Select time',
       pick_date_title: 'Select Rental Date', pick_date_btn: 'Select Date',
@@ -423,7 +400,7 @@
       rent_hrs: (h, we) => `${h}-hr rental (${we ? 'Weekend' : 'Weekday'})`,
       extra_hrs: we => `Extra hours (${we ? 'Weekend' : 'Weekday'})`,
       est_title: 'Estimated cost',
-      est_note: dp => `Automatically calculated from unit, dates, and rental times. Full breakdown is on the Review step. ${dp} DP is paid at the final step.`,
+      est_note: () => `Automatically calculated from unit, dates, and rental times. Full breakdown is on the Review step. DP payment link will be sent via WhatsApp after admin verification.`,
       err_invalid_time: 'Return time must be after pickup time.',
       err_incomplete_sch: 'Please complete rental dates and times first.',
       est_empty: 'Select rental dates and times.',
@@ -443,8 +420,8 @@
       inv_billed_by: 'Billed by', inv_billed_to: 'Billed to', inv_price: 'Price', inv_amt: 'Amount',
       inv_dp: 'DP (transfer)', inv_rem: 'Remaining balance',
       inv_notes: (max, r1, r2) => `Rates are automatically calculated based on unit, dates, and rental times (rounded per hour). Up to ${max} extra hours are charged ${r1}–${r2}/hr; beyond that, standard 12-hour rate applies. Final total is confirmed by admin.`,
-      ok_order_id: 'Order ID', ok_unit: 'Unit', ok_period: 'Rental period', ok_method: 'Payment method', ok_method_val: 'Bank Transfer (DP)',
-      ok_datetime: 'Date & time', ok_dp: 'DP paid', ok_total: 'Total rental'
+      ok_order_id: 'Order ID', ok_unit: 'Unit', ok_period: 'Rental period', ok_method: 'Status', ok_method_val: 'Awaiting admin verification',
+      ok_datetime: 'Date & time', ok_dp: 'DP payment', ok_total: 'Estimated total'
     }
   };
   const T_TXT = () => I18N[curLang] || I18N.id;
@@ -730,9 +707,9 @@
     area: v => v.trim().length >= 2 || T_TXT().err_area,
     alamat: v => v.trim().length >= 10 || T_TXT().err_alamat
   };
-  const stepFields = { 1: ['wa', 'nama', 'email'], 2: ['ecName', 'ecPhone', 'ig', 'tt', 'ktp', 'tujuan', 'area', 'alamat'], 3: [], 4: ['proof'] };
-  const isFileField = id => id === 'ktp' || id === 'proof';
-  const getFileErr = id => id === 'ktp' ? T_TXT().err_ktp : T_TXT().err_proof;
+  const stepFields = { 1: ['wa', 'nama', 'email'], 2: ['ecName', 'ecPhone', 'ig', 'tt', 'ktp', 'tujuan', 'area', 'alamat'], 3: [] };
+  const isFileField = id => id === 'ktp';
+  const getFileErr = () => T_TXT().err_ktp;
 
   function setError(el, msg) {
     const p = el.parentElement.querySelector('.err');
@@ -812,19 +789,14 @@
     updateNextBtn();
     renderStepper();
     if (n === 3) renderReview();
-    if (n === 4) { renderPayment(); renderInvoice(calc()); }
     requestAnimationFrame(triggerStepReveals);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   $('btnNext').onclick = () => {
     if (step < 3) { if (validateStep(step)) go(step + 1); return; }
-    if (step === 3) {
-      const ok = $('agree').checked;
-      $('agreeErr').classList.toggle('hidden', ok);
-      if (ok && validateStep(3)) go(4);
-      return;
-    }
-    if (validateStep(4)) showSuccess();
+    const ok = $('agree').checked;
+    $('agreeErr').classList.toggle('hidden', ok);
+    if (ok && validateStep(3)) showSuccess();
   };
   $('btnBack').onclick = () => go(step - 1);
   $('form').addEventListener('input', e => { if (e.target.matches('input, textarea')) setError(e.target, ''); updateProgress(); });
@@ -843,7 +815,6 @@
     });
   }
   bindUpload('ktp', 'ktpPreview', 'ktpLabel', 'ktp_upload');
-  bindUpload('proof', 'proofPreview', 'proofLabel', 'proof_upload');
 
   // ---------- Review ----------
   const row = (l, v) => `<div class="grid gap-1 py-2.5 sm:grid-cols-[150px_1fr]"><dt class="text-[11px] text-neutral-500">${l}</dt><dd class="whitespace-pre-line break-words text-xs font-medium">${esc(v || '-')}</dd></div>`;
@@ -918,8 +889,6 @@
       <div class="ml-auto mt-3 w-full max-w-[240px] rounded border border-neutral-100 p-3 text-[11px]">
         <div class="flex justify-between py-1"><span class="text-neutral-500">Subtotal</span><span>${rp(c.subtotal)}</span></div>
         <div class="mt-1 flex justify-between rounded bg-neutral-50 px-2 py-1.5 text-xs font-semibold"><span>Total</span><span>${rp(c.subtotal)}</span></div>
-        <div class="mt-1 flex justify-between py-1"><span class="text-neutral-500">${t.inv_dp}</span><span>- ${rp(DP)}</span></div>
-        <div class="flex justify-between py-1 font-semibold"><span>${t.inv_rem}</span><span>${rp(Math.max(0, c.subtotal - DP))}</span></div>
       </div>` : ''}
       <div class="mt-5 text-[10px] leading-relaxed text-neutral-500">
         <p>Notes</p>
@@ -956,10 +925,7 @@
 
   async function showSuccess() {
     const t = T_TXT(), c = calc(), now = new Date(), u = UNITS[unit];
-    const [ktpDataUrl, proofDataUrl] = await Promise.all([
-      fileToSmallDataUrl($('ktp').files[0]),
-      fileToSmallDataUrl($('proof').files[0])
-    ]);
+    const ktpDataUrl = await fileToSmallDataUrl($('ktp').files[0]);
     let orderId = Math.floor(1e7 + Math.random() * 9e7);
     try {
       if (window.TraverentDemo) {
@@ -977,9 +943,7 @@
           unit: u.n,
           s: withTime(S.start, S.t1).toISOString(),
           e: withTime(S.end, S.t2).toISOString(),
-          ktpDataUrl,
-          proofDataUrl,
-          dpAmount: DP
+          ktpDataUrl
         });
         if (created && created.id) orderId = created.id;
       }
@@ -991,7 +955,7 @@
       r(t.ok_order_id, orderId) + r(t.ok_unit, u.n) +
       r(t.ok_period, `${fmt(S.start)} – ${fmt(S.end)}`) +
       r(t.ok_method, t.ok_method_val) + r(t.ok_datetime, stamp) +
-      r(t.ok_dp, rp(DP)) + r(t.ok_total, c.state === 'ok' ? rp(c.subtotal) : '-');
+      r(t.ok_total, c.state === 'ok' ? rp(c.subtotal) : '-');
     close();
     $('app').classList.add('hidden');
     $('success').classList.remove('hidden');
@@ -1017,7 +981,6 @@
       if (t[k]) el.placeholder = t[k];
     });
     if (!$('ktp').files.length) $('ktpLabel').textContent = t.ktp_upload;
-    if (!$('proof').files.length) $('proofLabel').textContent = t.proof_upload;
     const btnId = $('lang-id'), btnEn = $('lang-en');
     if (btnId && btnEn) {
       if (curLang === 'en') {

@@ -197,6 +197,7 @@
   const DP_URL = location.origin + '/konfirmasi.html?step=dp&order=';
   const CREW_URL = location.origin + '/crew/';
   const RETURN_URL = location.origin + '/konfirmasi.html?step=return&order=';
+  const STATUS_URL = location.origin + '/konfirmasi.html?step=status&order=';
   const LOGIN_URL = 'index.html';
 
   // ---------- Alur status ----------
@@ -413,12 +414,61 @@
 
   function detailPanel(o) {
     let extra = '';
-    if (o.st === 'awaiting_dp') extra = sec('Menunggu bukti DP', `<p class="text-sm text-neutral-500">Penyewa sudah menerima link upload DP (${rp(DP_AMOUNT)}). Status order otomatis berubah saat bukti diunggah.</p><button type="button" data-act="simDP" class="mt-3 rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600 hover:bg-neutral-200">Simulasikan penyewa upload DP (demo)</button>`);
+    if (o.st === 'awaiting_dp') extra = sec('Menunggu bukti DP', `<p class="text-sm text-neutral-500">Penyewa sudah menerima link upload DP (${rp(DP_AMOUNT)}). Status order otomatis berubah saat bukti diunggah.</p>
+      <div class="mt-3 rounded-md border border-neutral-200 bg-neutral-50 p-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="min-w-0 flex-1">
+            <p class="text-[11px] font-semibold text-neutral-800">Link Upload Bukti DP</p>
+            <p class="mt-0.5 truncate font-mono text-[11px] text-neutral-500">${esc(DP_URL + o.id)}</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <a href="${DP_URL}${o.id}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1.5 text-xs font-medium text-blue-600 shadow-sm hover:bg-neutral-50">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>Lihat Link
+            </a>
+            <button type="button" data-flow-preview="sendDP" class="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Lihat Pesan
+            </button>
+          </div>
+        </div>
+      </div>
+      <button type="button" data-act="simDP" class="mt-3 rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600 hover:bg-neutral-200">Simulasikan penyewa upload DP (demo)</button>`);
     if (o.st === 'dp_uploaded') extra = sec('Tugaskan kru pengantar', `<p class="text-sm text-neutral-500">Periksa bukti DP di bagian Dokumen &amp; Bukti. Menugaskan kru akan menandai DP sebagai terverifikasi.</p>
       ${CREW.length ? '' : '<p class="mt-3 text-xs text-amber-700">Belum ada kru. Tambahkan kru di menu Kru Pengantaran.</p>'}
       <div class="mt-3 grid gap-2 sm:grid-cols-3">${CREW.map((c, i) => `<label class="flex cursor-pointer items-start gap-2 rounded-md bg-neutral-50 p-3 text-xs hover:bg-neutral-100 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-950"><input type="radio" name="crew" value="${c.n}" ${i === 0 ? 'checked' : ''} class="mt-0.5 accent-blue-600"><span><b class="block">${c.n}</b><span class="text-neutral-500">${load(c.n)} tugas aktif</span></span></label>`).join('')}</div>`);
-    if (o.crew) extra = sec('Pengantaran', row('Kru pengantar', o.crew) + row('Antar ke', o.alamat) + row('Waktu antar', ft(o.s)));
+    if (o.crew) extra = sec('Pengantaran', row('Kru pengantar', o.crew) + row('Antar ke', o.alamat) + row('Waktu antar', ft(o.s))
+      + `<div class="mt-3 rounded-md border border-neutral-200 bg-neutral-50 p-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] font-semibold text-neutral-800">Link Status Pesanan Customer</p>
+              <p class="mt-0.5 truncate font-mono text-[11px] text-neutral-500">${esc(STATUS_URL + o.id)}</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <a href="${STATUS_URL}${o.id}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1.5 text-xs font-medium text-blue-600 shadow-sm hover:bg-neutral-50">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>Lihat Link
+              </a>
+              <button type="button" data-flow-preview="notify" class="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Lihat Pesan
+              </button>
+            </div>
+          </div>
+        </div>`);
     if (['notified', 'return_due', 'return_assigned', 'return_notified', 'settled'].includes(o.st)) extra += sec('Pengembalian', row('Jadwal kembali', ft(o.e)) + (o.rcrew ? row('Kru pengembalian', o.rcrew) : '') + (o.st === 'settled' ? row('Pelunasan', 'Dikonfirmasi kru') : '')
+      + (['return_assigned', 'return_notified'].includes(o.st) ? `<div class="mt-3 rounded-md border border-neutral-200 bg-neutral-50 p-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] font-semibold text-neutral-800">Link Konfirmasi Pengembalian</p>
+              <p class="mt-0.5 truncate font-mono text-[11px] text-neutral-500">${esc(RETURN_URL + o.id)}</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <a href="${RETURN_URL}${o.id}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1.5 text-xs font-medium text-blue-600 shadow-sm hover:bg-neutral-50">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>Lihat Link
+              </a>
+              <button type="button" data-flow-preview="notifyReturn" class="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Lihat Pesan
+              </button>
+            </div>
+          </div>
+        </div>` : '')
       + (o.st === 'notified' ? `<p class="mt-2 text-xs text-neutral-500">Status otomatis berubah menjadi "Waktunya kembali" saat jadwal kembali dari formulir sewa tiba.</p>${demoBtn('simReturn', 'Simulasikan waktu kembali tiba (demo)')}` : '')
       + (o.st === 'return_notified' ? `<p class="mt-2 text-xs text-neutral-500">Kru memperbarui status lunas dan mengunggah bukti pelunasan lewat aplikasi kru. Bukti muncul di Dokumen &amp; Bukti dengan label kru. Sisa pembayaran: ${rp(remain(o))}.</p>${demoBtn('simSettle', 'Simulasikan kru konfirmasi lunas + upload bukti (demo)')}` : ''));
     if (o.st === 'return_due') extra += sec('Tugaskan kru pengembalian', `<p class="text-sm text-neutral-500">Pilih kru yang akan mengambil motor dan menerima pelunasan dari penyewa.</p>${crewPick('rcrew')}`);
@@ -472,6 +522,7 @@
       : tab === 'log' ? `<ul class="space-y-1 rounded-md bg-white p-4">${o.log.map(l => `<li class="flex gap-4 rounded-md bg-neutral-50 px-3 py-3 text-xs"><span class="w-12 shrink-0 text-neutral-400">${l.t}</span><span>${esc(l.x)}</span></li>`).join('')}</ul>`
       : detailPanel(o);
     const pri = PRI[o.st];
+    const flow = pri ? getFlowMsg(pri[0], o) : null;
     $('detail').innerHTML = `<div class="rounded-md bg-neutral-50 p-3">
       <section class="rounded-md bg-white p-5">
         <h2 class="text-4xl font-medium tracking-tight">#${o.id}</h2>
@@ -479,7 +530,19 @@
         <div class="mt-4 rounded-md bg-neutral-50 px-4 py-3"><p class="text-xs text-neutral-500">Total biaya</p><p class="text-2xl font-semibold tracking-tight text-neutral-900">${rp(c.total)}</p><p class="text-xs text-neutral-500">Sewa ${dur(o.s, o.e)} · ${o.unit}</p></div>
       </section>
       <div class="my-3">${tabs}</div>${body}
-      <div class="mt-3 flex items-center justify-between gap-2">${btn('contact', 'Kontak')}${pri ? btn(pri[0], pri[1], 1) : ''}</div></div>`;
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-2">${btn('contact', 'Kontak')}
+        <div class="flex flex-wrap items-center gap-2">
+          ${flow && flow.link ? `<a href="${flow.link}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium text-blue-600 hover:bg-neutral-50 hover:border-blue-300 transition-colors shadow-sm">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            Lihat Link
+          </a>` : ''}
+          ${flow ? `<button type="button" data-flow-preview="${pri[0]}" class="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-colors shadow-sm">
+            <svg class="h-3.5 w-3.5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Lihat Pesan
+          </button>` : ''}
+          ${pri ? btn(pri[0], pri[1], 1) : ''}
+        </div>
+      </div></div>`;
   }
 
   // ---------- Template pesan WhatsApp ----------
@@ -494,6 +557,7 @@ Untuk mengamankan unit, silakan bayar DP ${rp(DP_AMOUNT)} lalu unggah bukti tran
 ${DP_URL}${o.id}
 
 Setelah bukti DP kami terima, kru akan kami jadwalkan untuk mengantar motor. Terima kasih!`;
+
   const tplNotify = o => `Halo ${o.nama}, DP untuk pesanan ${o.id} sudah kami terima dan motor siap diantar.
 
 Unit: ${o.unit}
@@ -502,7 +566,11 @@ Kembali: ${ft(o.e)}
 Diantar ke: ${o.alamat}
 Kru pengantar: ${o.crew} (${(CREW.find(c => c.n === o.crew) || {}).wa || '-'})
 
+Status pesanan kamu dapat dipantau di:
+${STATUS_URL}${o.id}
+
 Kru kami akan mengantar motor sesuai jadwal. Mohon siapkan KTP asli saat serah terima. Terima kasih sudah memilih Traverent Bandung!`;
+
   const tplReturn = o => `Halo ${o.nama}, kami dari Traverent Bandung. Waktu pengembalian motor untuk pesanan ${o.id} sudah tiba.
 
 Unit: ${o.unit}
@@ -517,6 +585,15 @@ Setelah motor diserahkan, konfirmasi pengembalian lewat link berikut:
 ${RETURN_URL}${o.id}
 
 Jika ada kendala, silakan balas pesan ini. Terima kasih sudah memilih Traverent Bandung!`;
+
+  // Info pesan & link untuk setiap flow komunikasi customer
+  function getFlowMsg(actKey, o) {
+    if (actKey === 'sendDP') return { title: 'Kirim Link DP', msg: tplDP(o), link: DP_URL + o.id, linkName: 'Link upload bukti DP' };
+    if (actKey === 'notify') return { title: 'Notifikasi Customer', msg: tplNotify(o), link: STATUS_URL + o.id, linkName: 'Link status pesanan customer' };
+    if (actKey === 'notifyReturn') return { title: 'Notifikasi Pengembalian', msg: tplReturn(o), link: RETURN_URL + o.id, linkName: 'Link konfirmasi pengembalian' };
+    return null;
+  }
+
   // Cek otomatis: saat jadwal kembali (dari formulir sewa) tiba, status berubah ke "Waktunya kembali"
   function syncReturn() {
     const now = new Date(); let ch = false;
@@ -524,8 +601,48 @@ Jika ada kendala, silakan balas pesan ini. Terima kasih sudah memilih Traverent 
     return ch;
   }
 
+  // Modal preview pesan & verifikasi link sebelum dikirim
+  function openMsgPreview(k) {
+    const o = get();
+    const info = getFlowMsg(k, o);
+    if (!info) return executeAct(k);
+    const linkBox = info.link ? `
+      <div class="mb-3 rounded-md border border-blue-200 bg-blue-50/80 p-3 text-xs text-blue-950">
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0 flex-1">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-blue-800">${esc(info.linkName)}</p>
+            <p class="mt-0.5 truncate font-mono text-[11px] font-medium text-blue-900">${esc(info.link)}</p>
+          </div>
+          <a href="${info.link}" target="_blank" rel="noopener" class="inline-flex shrink-0 items-center gap-1 rounded bg-white px-2.5 py-1.5 text-xs font-semibold text-blue-700 shadow-sm hover:bg-blue-100">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            Buka Link ↗
+          </a>
+        </div>
+      </div>` : '';
+    openModal('Preview Pesan — ' + info.title,
+      `<div class="space-y-3">
+        <div class="flex items-center justify-between rounded-md bg-neutral-100 px-3 py-2 text-xs">
+          <span class="text-neutral-500">Tujuan WhatsApp:</span>
+          <span class="font-semibold text-neutral-900">${esc(o.nama)} (${esc(o.wa)})</span>
+        </div>
+        ${linkBox}
+        <div>
+          <p class="mb-1 text-[11px] font-medium text-neutral-500">Pratinjau isi pesan WhatsApp:</p>
+          <pre class="max-h-60 overflow-y-auto whitespace-pre-wrap rounded-md border border-neutral-200 bg-neutral-50 p-3.5 font-sans text-xs leading-relaxed text-neutral-800">${esc(info.msg)}</pre>
+        </div>
+      </div>`,
+      cancelBtn + mb('confirmSendMsg', 'Kirim via WhatsApp', k, 'dark'));
+  }
+
   // ---------- Aksi admin ----------
   function act(k) {
+    if (k === 'sendDP' || k === 'notify' || k === 'notifyReturn') {
+      return openMsgPreview(k);
+    }
+    executeAct(k);
+  }
+
+  function executeAct(k) {
     const o = get();
     if (k === 'contact') return waOpen(o, '');   // buka chat WhatsApp tanpa template
     if (k === 'simReturn') { o.st = 'return_due'; logNow(o, 'Jadwal kembali tiba (sesuai formulir sewa)'); }
@@ -896,7 +1013,8 @@ Setelah mendaftar, admin akan memeriksa datamu. Terima kasih!`;
       logoutOk: () => { try { localStorage.removeItem(ADMIN_AUTH_KEY); } catch (_) {} location.href = LOGIN_URL; },
       expToggle: () => $('exp-menu').classList.toggle('hidden'),
       expPdf: () => { $('exp-menu').classList.add('hidden'); exportPdf(); },
-      expXls: () => { $('exp-menu').classList.add('hidden'); exportXls(); }
+      expXls: () => { $('exp-menu').classList.add('hidden'); exportXls(); },
+      confirmSendMsg: () => { closeModal(); executeAct(id); }
     })[k]();
   }
 
@@ -940,9 +1058,10 @@ Setelah mendaftar, admin akan memeriksa datamu. Terima kasih!`;
   // ---------- Event ----------
   function refresh() { syncStore(); renderNav(); renderStats(); renderList(); renderDetail(); renderCrew(); renderFinance(); renderUnits(); renderCal(); }
   document.addEventListener('click', e => {
-    const s = e.target.closest('[data-sel]'), t = e.target.closest('[data-tab]'), a = e.target.closest('[data-act]'), im = e.target.closest('[data-img]');
+    const s = e.target.closest('[data-sel]'), t = e.target.closest('[data-tab]'), a = e.target.closest('[data-act]'), im = e.target.closest('[data-img]'), fp = e.target.closest('[data-flow-preview]');
     if (s) { sel = s.dataset.sel; tab = 'detail'; renderList(); renderDetail(); if (innerWidth < 1024) $('detail').scrollIntoView({ behavior: 'smooth' }); }
     if (t) { tab = t.dataset.tab; renderDetail(); }
+    if (fp) openMsgPreview(fp.dataset.flowPreview);
     if (a) act(a.dataset.act);
     if (im) openLb(im);
     const cal = e.target.closest('[data-cal]'), ufb = e.target.closest('[data-uf]'), ofb = e.target.closest('[data-of]'), cfb = e.target.closest('[data-cf]'), od = e.target.closest('[data-order]');
